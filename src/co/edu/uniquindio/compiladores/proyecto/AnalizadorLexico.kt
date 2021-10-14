@@ -38,8 +38,8 @@ class AnalizadorLexico ( var codigoFuente:String)
         //    if (esIncrementoODecremento()) continue
         //    if (esComentario()) continue
             if (esOperadorAritmetico()) continue
-        //    if (esCaracter()) continue
-        //    if (esCadenaCaracteres()) continue
+            if (esCaracter()) continue
+            if (esCadenaCaracteres()) continue
             if (esFinSentencia()) continue
 
 
@@ -65,58 +65,54 @@ class AnalizadorLexico ( var codigoFuente:String)
         }
 
 
-}
+    }
     fun obtenerCaracterN(posicionN:Int, columna:Int, fila:Int) {
-    posicionActual = posicionN;
-    if (posicionActual < codigoFuente.length) {
-        caracterActual = codigoFuente[posicionActual];
-        columnaActual = columna;
-        filaActual = fila;
+        posicionActual = posicionN;
+        if (posicionActual < codigoFuente.length) {
+            caracterActual = codigoFuente[posicionActual];
+            columnaActual = columna;
+            filaActual = fila;
+        }
     }
 
-}
-
     fun esEntero(): Boolean {
+        if( caracterActual.isDigit() ) {
 
-    if( caracterActual.isDigit() ) {
+            var palabra = ""
+            var fila = filaActual
+            var columna = columnaActual
+            var posicionInicial = posicionActual
 
-        var palabra = ""
-        var fila = filaActual
-        var columna = columnaActual
-        var posicionInicial = posicionActual
-
-        //Transición
-        palabra+=caracterActual
-        obtenerSgteCaracter()
+            //Transición
+            palabra+=caracterActual
+            obtenerSgteCaracter()
 
 
-        if (caracterActual != '.') {
-            while( caracterActual.isDigit() ) {
-                //Transición
-                palabra += caracterActual
-                obtenerSgteCaracter()
-            }
+            if (caracterActual != '.') {
+                while( caracterActual.isDigit() ) {
+                    //Transición
+                    palabra += caracterActual
+                    obtenerSgteCaracter()
+                }
                 if (caracterActual == '.') {
                     hacerBT(posicionInicial, columna, fila)
                     return false
                 }
 
+                almacenarToken(palabra, Categoria.ENTERO, fila, columna)
+                return true
 
-            almacenarToken(palabra, Categoria.ENTERO, fila, columna)
-            return true
+            }else {
+                obtenerCaracterN(posicionInicial, columna, fila)
+                return false
+            }
 
-        }else {
-            obtenerCaracterN(posicionInicial, columna, fila)
-            return false
         }
 
+    return false
     }
 
-    return false
 
-
-
-}
     fun esDecimal(): Boolean {
         if (caracterActual.isDigit() || caracterActual == '.') {
 
@@ -171,8 +167,8 @@ class AnalizadorLexico ( var codigoFuente:String)
 
         }
         //RI
-            return false
-        }
+        return false
+    }
 
 
     fun esIdentificador(): Boolean
@@ -322,6 +318,57 @@ class AnalizadorLexico ( var codigoFuente:String)
             }
         }
 
+        return false
+    }
+
+    fun esCaracter():Boolean {
+        if (caracterActual == Char(39)) {
+            var palabra = ""
+            val fila = filaActual
+            val columna = columnaActual
+
+            //Transición
+            palabra += caracterActual
+            obtenerSgteCaracter()
+            if (caracterActual >= Char(32) && caracterActual <= Char(255)) {
+                palabra += caracterActual
+                obtenerSgteCaracter()
+
+                if (caracterActual == Char(39)){
+                    palabra += caracterActual
+                    almacenarToken(palabra, Categoria.CARACTER, fila, columna)
+                    return true
+                } else {
+                    //RE
+                }
+            }
+        }
+
+        //RI
+        return false
+    }
+
+    fun esCadenaCaracteres():Boolean {
+        if (caracterActual == '$') {
+            var palabra = ""
+            val fila = filaActual
+            val columna = columnaActual
+
+            //Transición
+            palabra += caracterActual
+            obtenerSgteCaracter()
+            while (caracterActual >= Char(32) && caracterActual <= Char(255)) {
+                if (caracterActual == '$') {
+                    palabra += caracterActual
+                    almacenarToken(palabra, Categoria.CADENA_CARACTERES, fila, columna)
+                    return true
+                }
+                palabra += caracterActual
+                obtenerSgteCaracter()
+            }
+        }
+
+        //RI
         return false
     }
 }
