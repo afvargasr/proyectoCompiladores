@@ -1,5 +1,7 @@
 package co.edu.uniquindio.compiladores.proyecto
 
+import co.edu.uniquindio.compiladores.proyecto.excepciones.ReporteErrorException
+
 class AnalizadorLexico ( var codigoFuente:String)
 {
     var posicionActual = 0
@@ -31,18 +33,17 @@ class AnalizadorLexico ( var codigoFuente:String)
             if (esDecimal()) continue
             if (esIdentificador()) continue
          //   if (esReservadas()) continue
-            // if (esOperadorLogico()) continue
-        //    if (esAgrupador()) continue
+            if (esOperadorLogico()) continue
+            if (esAgrupador()) continue
             if (esOperadorRelacional()) continue
-        //    if (esAsignacion()) continue
-        //    if (esIncrementoODecremento()) continue
-        //    if (esComentario()) continue
+            if (esAsignacion()) continue
+            if (esIncrementoODecremento()) continue
+            if (esComentarioLinea()) continue
+            if (esComentarioBloque()) continue
             if (esOperadorAritmetico()) continue
             if (esCaracter()) continue
             if (esCadenaCaracteres()) continue
             if (esFinSentencia()) continue
-
-
 
         }
     }
@@ -64,8 +65,8 @@ class AnalizadorLexico ( var codigoFuente:String)
             caracterActual = finCodigo
         }
 
-
     }
+
     fun obtenerCaracterN(posicionN:Int, columna:Int, fila:Int) {
         posicionActual = posicionN;
         if (posicionActual < codigoFuente.length) {
@@ -100,6 +101,7 @@ class AnalizadorLexico ( var codigoFuente:String)
                 }
 
                 almacenarToken(palabra, Categoria.ENTERO, fila, columna)
+                obtenerSgteCaracter()
                 return true
 
             }else {
@@ -162,8 +164,8 @@ class AnalizadorLexico ( var codigoFuente:String)
             }
 
             almacenarToken(palabra, Categoria.DECIMAL, fila, columna)
+            obtenerSgteCaracter()
             return true
-
 
         }
         //RI
@@ -215,6 +217,7 @@ class AnalizadorLexico ( var codigoFuente:String)
             }
 
             almacenarToken(palabra, Categoria.IDENTIFICADOR, fila, columna)
+            obtenerSgteCaracter()
             return true
         }
         return false
@@ -231,15 +234,14 @@ class AnalizadorLexico ( var codigoFuente:String)
             palabra += caracterActual
 
             almacenarToken(palabra, Categoria.FIN_SENTENCIA, fila, columna)
+            obtenerSgteCaracter()
             return true
         }
         return false
     }
 
     fun esOperadorAritmetico(): Boolean {
-
         if (caracterActual == '+' || caracterActual == '-' || caracterActual == '/' || caracterActual == '*' || caracterActual == '%') {
-
             var palabra = ""
             val fila = filaActual
             val columna = columnaActual
@@ -252,13 +254,14 @@ class AnalizadorLexico ( var codigoFuente:String)
 
                 if(caracterActual== '+' || caracterActual== '=')
                 {
-                        hacerBT(posicionInicial, columna, fila)
-                        return false
+                    hacerBT(posicionInicial, columna, fila)
+                    return false
                 }
-            }else
-            {
-                palabra += caracterActual
-                obtenerSgteCaracter()
+                else
+                {
+                    palabra += caracterActual
+                    obtenerSgteCaracter()
+                }
             }
 
             if(caracterActual=='-')
@@ -271,36 +274,32 @@ class AnalizadorLexico ( var codigoFuente:String)
                     hacerBT(posicionInicial, columna, fila)
                     return false
                 }
+                else
+                {
+                    palabra += caracterActual
+                    obtenerSgteCaracter()
+                }
             }
-            else
+            if(caracterActual =='/' || caracterActual == '*' || caracterActual == '%')
             {
                 palabra += caracterActual
                 obtenerSgteCaracter()
             }
-
-            if(caracterActual =='/')
-            {
-                palabra += caracterActual
-                obtenerSgteCaracter()
-            }
-
-
-
             almacenarToken(palabra, Categoria.OPERADOR_ARTIMETICO, fila, columna)
+            obtenerSgteCaracter()
             return true
         }
         return false
     }
 
-
     fun esOperadorRelacional(): Boolean
     {
         if (caracterActual == '<' || caracterActual == '>' || caracterActual == '!' || caracterActual == '=') {
-
             var palabra = ""
             val fila = filaActual
             val columna = columnaActual
             val caracterInicial = caracterActual
+            val posicionInicial = posicionActual
 
             //Transición
             palabra += caracterActual
@@ -309,11 +308,40 @@ class AnalizadorLexico ( var codigoFuente:String)
                 if (caracterActual == '=') {
                     //Transición
                     palabra += caracterActual
+                    almacenarToken(palabra, Categoria.OPERADOR_RELACIONAL, fila, columna)
                     obtenerSgteCaracter()
+                    return true
                 } else {
                     //Transición
-                    palabra += caracterActual
+                    almacenarToken(palabra, Categoria.OPERADOR_RELACIONAL, fila, columna)
                     obtenerSgteCaracter()
+                    return true
+                }
+            }
+            if(caracterInicial=='!')
+            {
+                if(caracterActual== '!' || caracterActual.isDigit() || caracterActual.isLetter())
+                {
+                    hacerBT(posicionInicial, columna, fila)
+                    return false
+                }
+                if(caracterActual== '=')
+                {
+                    palabra += caracterActual
+                    almacenarToken(palabra, Categoria.OPERADOR_RELACIONAL, fila, columna)
+                    obtenerSgteCaracter()
+                    return true
+                }
+            }
+            if (caracterInicial == '=') {
+                if (caracterActual == '=') {
+                    palabra += caracterActual
+                    almacenarToken(palabra, Categoria.OPERADOR_RELACIONAL, fila, columna)
+                    obtenerSgteCaracter()
+                    return true
+                } else {
+                    hacerBT(posicionInicial, columna, fila)
+                    return false
                 }
             }
         }
@@ -321,6 +349,7 @@ class AnalizadorLexico ( var codigoFuente:String)
         return false
     }
 
+    @Throws(ReporteErrorException::class)
     fun esCaracter():Boolean {
         if (caracterActual == Char(39)) {
             var palabra = ""
@@ -337,9 +366,11 @@ class AnalizadorLexico ( var codigoFuente:String)
                 if (caracterActual == Char(39)){
                     palabra += caracterActual
                     almacenarToken(palabra, Categoria.CARACTER, fila, columna)
+                    obtenerSgteCaracter()
                     return true
                 } else {
                     //RE
+                    throw ReporteErrorException("No se encontró el cierre del carácter")
                 }
             }
         }
@@ -348,6 +379,7 @@ class AnalizadorLexico ( var codigoFuente:String)
         return false
     }
 
+    @Throws(ReporteErrorException::class)
     fun esCadenaCaracteres():Boolean {
         if (caracterActual == '$') {
             var palabra = ""
@@ -361,8 +393,30 @@ class AnalizadorLexico ( var codigoFuente:String)
                 if (caracterActual == '$') {
                     palabra += caracterActual
                     almacenarToken(palabra, Categoria.CADENA_CARACTERES, fila, columna)
+                    obtenerSgteCaracter()
                     return true
                 }
+                palabra += caracterActual
+                obtenerSgteCaracter()
+            }
+            //RE
+            throw ReporteErrorException("No se encontró el cierre de la cadena de carácteres")
+        }
+
+        //RI
+        return false
+    }
+
+    fun esComentarioLinea(): Boolean {
+        if (caracterActual == '_') {
+            var palabra = ""
+            val fila = filaActual
+            val columna = columnaActual
+
+            //Transición
+            palabra += caracterActual
+            obtenerSgteCaracter()
+            while (caracterActual >= Char(32) && caracterActual <= Char(255)) {
                 palabra += caracterActual
                 obtenerSgteCaracter()
             }
@@ -371,4 +425,167 @@ class AnalizadorLexico ( var codigoFuente:String)
         //RI
         return false
     }
+
+    @Throws(ReporteErrorException::class)
+    fun esComentarioBloque(): Boolean {
+        if(caracterActual == '*') {
+            var palabra = ""
+            val fila = filaActual
+            val columna = columnaActual
+            val posicionInicial = posicionActual
+
+            //Transición
+            palabra += caracterActual
+            obtenerSgteCaracter()
+            if (caracterActual == '*') {
+                palabra += caracterActual
+                obtenerSgteCaracter()
+                while (caracterActual >= Char(32) && caracterActual <= Char(255)) {
+                    if (caracterActual == '*') {
+                        palabra += caracterActual
+                        almacenarToken(palabra, Categoria.COMENTARIO_BLOQUE, fila, columna)
+                        obtenerSgteCaracter()
+                        return true
+                    }
+                    palabra += caracterActual
+                    obtenerSgteCaracter()
+                }
+                //RE
+                throw ReporteErrorException("No se encontró el cierre del comentario de bloque")
+            } else {
+                hacerBT(posicionInicial,columna,fila)
+                return false
+            }
+        }
+
+        //RI
+        return false
+    }
+
+    fun esAsignacion(): Boolean {
+        if (caracterActual == '=' || caracterActual == '+' || caracterActual == '-') {
+            var palabra = ""
+            val fila = filaActual
+            val columna = columnaActual
+            val caracterInicial = caracterActual
+            val posicionInicial = posicionActual
+
+            //Transición
+            palabra += caracterActual
+            obtenerSgteCaracter()
+            if (caracterInicial == '=' && caracterActual != '=') {
+                almacenarToken(palabra, Categoria.OPERADOR_ASIGNACION, fila, columna)
+                obtenerSgteCaracter()
+                return true
+            } else {
+                hacerBT(posicionInicial,columna,fila)
+                return false
+            }
+
+            if (caracterInicial != '=' && caracterActual == '=') {
+                almacenarToken(palabra, Categoria.OPERADOR_ASIGNACION, fila, columna)
+                obtenerSgteCaracter()
+                return true
+            } else {
+                hacerBT(posicionInicial,columna,fila)
+                return false
+            }
+        }
+
+        //RI
+        return false
+    }
+
+    fun esAgrupador(): Boolean {
+        if (caracterActual == '(' || caracterActual == ')' || caracterActual == '[' || caracterActual == ']' || caracterActual == '{' || caracterActual == '}') {
+            var palabra = "" + caracterActual
+            val fila = filaActual
+            val columna = columnaActual
+            val posicionInicial = posicionActual
+
+            almacenarToken(palabra, Categoria.AGRUPADOR, fila, columna)
+            obtenerSgteCaracter()
+            return true
+        }
+        //RI
+        return false
+    }
+
+    fun esOperadorLogico(): Boolean {
+
+        if (caracterActual=='&' || caracterActual=='|' || caracterActual=='!') {
+
+            var palabra = ""
+            val fila = filaActual
+            val columna = columnaActual
+            val posicionInicial = posicionActual
+
+            //Transición
+            palabra += caracterActual
+            obtenerSgteCaracter();
+
+            if(caracterActual=='!') {
+                palabra += caracterActual
+                obtenerSgteCaracter()
+
+                if (caracterActual == '=' || caracterActual.isDigit() || caracterActual.isLetter())
+                {
+                    hacerBT(posicionInicial, columna, fila)
+                    return false;
+                }
+
+                else
+                {
+                    if(caracterActual=='!')
+                    {
+                        palabra += caracterActual
+                        obtenerSgteCaracter()
+
+                        almacenarToken(palabra, Categoria.OPERADOR_LOGICO, fila, columna)
+                        obtenerSgteCaracter()
+                        return true
+                    }
+                }
+            }
+            if(caracterActual=='&' || caracterActual=='|')
+            {
+                palabra += caracterActual
+                obtenerSgteCaracter()
+
+                almacenarToken(palabra, Categoria.OPERADOR_LOGICO, fila, columna)
+                obtenerSgteCaracter()
+                return true
+            }
+        }
+
+        return false
+    }
+
+    fun esIncrementoODecremento(): Boolean
+    {
+        if (caracterActual=='+' || caracterActual=='-') {
+            var palabra = ""
+            val fila = filaActual
+            val columna = columnaActual
+            val posicionInicial = posicionActual
+            val caracterInicial = caracterActual
+
+            //Transición
+            palabra += caracterActual
+            obtenerSgteCaracter();
+
+            if ((caracterInicial=='+' && caracterActual=='+') || (caracterInicial=='-' && caracterActual=='-')) {
+                palabra += caracterActual;
+                almacenarToken(palabra, Categoria.INCREMENTO_DECREMENTO, fila,columna)
+                obtenerSgteCaracter()
+                return true;
+            } else {
+                hacerBT(posicionInicial, columna, fila);
+                return false;
+            }
+        }
+
+        return false;
+    }
+
 }
