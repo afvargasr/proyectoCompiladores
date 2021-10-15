@@ -2,6 +2,12 @@ package co.edu.uniquindio.compiladores.proyecto
 
 import co.edu.uniquindio.compiladores.proyecto.excepciones.ReporteErrorException
 
+/**
+ * Analizador léxico del compilador
+ * @author DANIELA FLOREZ, ANDRES BETANCOURT, ALEX VARGAS
+ * @param codigoFuente para analizar
+ */
+
 class AnalizadorLexico ( var codigoFuente:String)
 {
     var posicionActual = 0
@@ -23,6 +29,11 @@ class AnalizadorLexico ( var codigoFuente:String)
         caracterActual = codigoFuente[posicionActual]
     }
 
+	/**
+	 * Metodo que permite analizar el codigo e ir agregando a la lista de token la
+	 * palabra identificada con su categoria y ubicacion donde fue encontrada. Fila
+	 * y columna donde inicia
+	 */
     fun analizar() {
         while (caracterActual !== finCodigo) {
             if (caracterActual == ' ' || caracterActual == '\t' || caracterActual == '\n') {
@@ -56,7 +67,11 @@ class AnalizadorLexico ( var codigoFuente:String)
             obtenerSgteCaracter()
         }
     }
-
+    
+    /**
+	 * Permite obtener el siguiente caracter del codigo fuente
+	 * 
+	 */
     fun obtenerSgteCaracter() {
 
         posicionActual++
@@ -75,7 +90,10 @@ class AnalizadorLexico ( var codigoFuente:String)
         }
 
     }
-
+    /**
+	 * Permite obtener el caracter en la posicion n del codigo fuente
+	 * 
+	 */
     fun obtenerCaracterN(posicionN:Int, columna:Int, fila:Int) {
         posicionActual = posicionN
         if (posicionActual < codigoFuente.length) {
@@ -84,7 +102,13 @@ class AnalizadorLexico ( var codigoFuente:String)
             filaActual = fila
         }
     }
-
+    
+    /**
+	 * Metodo que permite verificar si un numero es entero
+	 * 
+	 * @return true si es entero false si no
+	 */
+    
     fun esEntero(): Boolean {
         if( caracterActual.isDigit() ) {
 
@@ -119,11 +143,15 @@ class AnalizadorLexico ( var codigoFuente:String)
             }
 
         }
-
+    //Rechazo Inmediato
     return false
     }
-
-
+    
+    /**
+	 * Metodo que permite verificar si un numero Decimal
+	 * 
+	 * @return true si es real false si no
+	 */
     fun esDecimal(): Boolean {
         if (caracterActual.isDigit() || caracterActual == '.') {
 
@@ -177,11 +205,17 @@ class AnalizadorLexico ( var codigoFuente:String)
             return true
 
         }
-        //RI
+        //Rechazo inmediato
         return false
     }
-
-
+    
+    /**
+	 * Permite ver si una cadena es un identificador. Un identificador inicia con ! y concatenacion
+	 * de letras y digitos
+	 * 
+	 * 
+	 *@return true si es identificador false si no
+	 */
     fun esIdentificador(): Boolean
     {
         if (caracterActual.isLetter() || caracterActual == '!')
@@ -230,7 +264,13 @@ class AnalizadorLexico ( var codigoFuente:String)
         }
         return false
     }
-
+    
+    /**
+	 * Permite ver si es fin de sentencia
+	 * 
+	 * 
+	 *@return true si es fin de sentencia false si no
+	 */
     fun esFinSentencia(): Boolean
     {
         if(caracterActual == ';')
@@ -247,7 +287,12 @@ class AnalizadorLexico ( var codigoFuente:String)
         }
         return false
     }
-
+    
+    /**
+	 * Metodo que permite verificar si un operador es aritmetico
+	 * 
+	 * @return true si es operador aritmetico false si no
+	 */
     fun esOperadorAritmetico(): Boolean {
         if (caracterActual == '+' || caracterActual == '-' || caracterActual == '/' || caracterActual == '*' || caracterActual == '%') {
             var palabra = ""
@@ -299,6 +344,11 @@ class AnalizadorLexico ( var codigoFuente:String)
         return false
     }
 
+    /**
+	 * Metodo que permite verificar si un operador es relacional
+	 * 
+	 * @return true si es operador relacional false si no
+	 */
     fun esOperadorRelacional(): Boolean
     {
         if (caracterActual == '<' || caracterActual == '>' || caracterActual == '!' || caracterActual == '=') {
@@ -355,8 +405,16 @@ class AnalizadorLexico ( var codigoFuente:String)
 
         return false
     }
-
+    
+    //Excepcion propia para reporte error
     @Throws(ReporteErrorException::class)
+    
+    /**
+	 * Permite ver si es un caracter
+	 * 
+	 * 
+	 *@return true si es un caracter false si no
+	 */
     fun esCaracter():Boolean {
         if (caracterActual == Char(39)) {
             var palabra = ""
@@ -387,6 +445,13 @@ class AnalizadorLexico ( var codigoFuente:String)
     }
 
     @Throws(ReporteErrorException::class)
+    
+    /**
+	 * Permite ver si es una cadena de caracteres 
+	 * 
+	 * 
+	 *@return true si es una cadena de caracteres false si no
+	 */
     fun esCadenaCaracteres():Boolean {
         if (caracterActual == '#') {
             var palabra = ""
@@ -414,6 +479,12 @@ class AnalizadorLexico ( var codigoFuente:String)
         return false
     }
 
+    /**
+	 * Permite ver si es un comentario de linea
+	 * 
+	 * 
+	 *@return true si es una comentario de linea false si no
+	 */
     fun esComentarioLinea(): Boolean {
         if (caracterActual == '_') {
             var palabra = ""
@@ -434,6 +505,13 @@ class AnalizadorLexico ( var codigoFuente:String)
     }
 
     @Throws(ReporteErrorException::class)
+    
+    /**
+	 * Permite ver si es un comentario de bloque
+	 * 
+	 * 
+	 *@return true si es comentario de bloque false si no
+	 */
     fun esComentarioBloque(): Boolean {
         if(caracterActual == '*') {
             var palabra = ""
@@ -468,7 +546,13 @@ class AnalizadorLexico ( var codigoFuente:String)
         //RI
         return false
     }
-
+    
+    /**
+	 * Permite ver si es un operador de asignacion
+	 * 
+	 * 
+	 *@return true si es asignacion false si no
+	 */
     fun esAsignacion(): Boolean {
         if (caracterActual == '=' || caracterActual == '+' || caracterActual == '-') {
             var palabra = ""
@@ -505,6 +589,12 @@ class AnalizadorLexico ( var codigoFuente:String)
         return false
     }
 
+    /**
+	 * Permite ver si es un agrupador
+	 * 
+	 * 
+	 *@return true si es un agrupador false si no
+	 */
     fun esAgrupador(): Boolean {
         if (caracterActual == '(' || caracterActual == ')' || caracterActual == '[' || caracterActual == ']' || caracterActual == '{' || caracterActual == '}') {
             var palabra = caracterActual.toString()
@@ -520,6 +610,11 @@ class AnalizadorLexico ( var codigoFuente:String)
         return false
     }
 
+    /**
+	 * Metodo que permite verificar si un operador es logico
+	 * 
+	 * @return true si es operador logico false si no
+	 */
     fun esOperadorLogico(): Boolean {
 
         if (caracterActual=='&' || caracterActual=='|' || caracterActual=='!') {
@@ -557,10 +652,16 @@ class AnalizadorLexico ( var codigoFuente:String)
                 return true
             }
         }
-
+        //RI
         return false
     }
-
+    
+    /**
+	 * Permite ver si es incremento o decremento
+	 * 
+	 * 
+	 *@return true si es incremento o decremento false si no
+	 */
     fun esIncrementoODecremento(): Boolean
     {
         if (caracterActual=='+' || caracterActual=='-') {
@@ -584,10 +685,17 @@ class AnalizadorLexico ( var codigoFuente:String)
                 return false
             }
         }
-
+        //RI
         return false;
     }
 
+    /**
+	 * Permite ver si una palabra es reservada 
+	 * 
+	 * 
+	 *@return true si es una palabra reservada false si no
+	 */
+	
     fun esReservada(): Boolean {
         if (caracterActual == '@') {
             var palabra = ""
