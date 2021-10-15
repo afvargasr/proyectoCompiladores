@@ -1,5 +1,12 @@
 package co.edu.uniquindio.compiladores.proyecto
 
+/**
+ * Definicion de las categorias lexicas del lenguaje 
+ * @author Laura Daniela Florez Polania
+ *  @author Alex Ferney Vargas
+ *   @author Andres Felipe Betancourt
+ *
+ */
 enum class Categoria
 {
     IDENTIFICADOR,
@@ -19,5 +26,6 @@ enum class Categoria
     COMENTARIO_LINEA,
     COMENTARIO_BLOQUE,
     CADENA_CARACTERES,
-    CARACTER
+    CARACTER,
+    DESCONOCIDO
 }
