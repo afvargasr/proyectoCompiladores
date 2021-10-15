@@ -7,11 +7,12 @@ class AnalizadorLexico ( var codigoFuente:String)
     var posicionActual = 0
     var filaActual = 0
     var columnaActual = 0
-    var caracterActual= codigoFuente[0]
+    var caracterActual = codigoFuente[0]
     var listaTokens =  ArrayList<Token>()
     var finCodigo = 0.toChar()
+    var palabrasReservadas = listOf<String>("@int", "@void", "@text", "@get", "@set", "@final", "@for", "@while", "@int", "@if", "@boolean")
 
-    fun almacenarToken(palabra:String ,categoria:Categoria,fila:Int, columna:Int ) = listaTokens.add(Token(palabra, categoria,fila, columna))
+    fun almacenarToken(palabra:String ,categoria:Categoria,fila:Int, columna:Int ) = listaTokens.add(Token(palabra, categoria, fila, columna))
 
     fun hacerBT(posicionInicial:Int, columna:Int, fila:Int) {
 
@@ -32,7 +33,7 @@ class AnalizadorLexico ( var codigoFuente:String)
             if (esEntero()) continue
             if (esDecimal()) continue
             if (esIdentificador()) continue
-         //   if (esReservadas()) continue
+            if (esReservada()) continue
             if (esOperadorLogico()) continue
             if (esAgrupador()) continue
             if (esOperadorRelacional()) continue
@@ -44,7 +45,15 @@ class AnalizadorLexico ( var codigoFuente:String)
             if (esCaracter()) continue
             if (esCadenaCaracteres()) continue
             if (esFinSentencia()) continue
+            if (esSeparador()) continue
+            if (esPunto()) continue
+            if (esDosPuntos()) continue
 
+            /*
+            * Si no se forma ningun token valido con la secuencia de caracteres el caracter se clasifica como desconocido
+            */
+            almacenarToken(caracterActual.toString(), Categoria.DESCONOCIDO, filaActual, columnaActual)
+            obtenerSgteCaracter()
         }
     }
 
@@ -68,11 +77,11 @@ class AnalizadorLexico ( var codigoFuente:String)
     }
 
     fun obtenerCaracterN(posicionN:Int, columna:Int, fila:Int) {
-        posicionActual = posicionN;
+        posicionActual = posicionN
         if (posicionActual < codigoFuente.length) {
-            caracterActual = codigoFuente[posicionActual];
-            columnaActual = columna;
-            filaActual = fila;
+            caracterActual = codigoFuente[posicionActual]
+            columnaActual = columna
+            filaActual = fila
         }
     }
 
@@ -498,7 +507,7 @@ class AnalizadorLexico ( var codigoFuente:String)
 
     fun esAgrupador(): Boolean {
         if (caracterActual == '(' || caracterActual == ')' || caracterActual == '[' || caracterActual == ']' || caracterActual == '{' || caracterActual == '}') {
-            var palabra = "" + caracterActual
+            var palabra = caracterActual.toString()
             val fila = filaActual
             val columna = columnaActual
             val posicionInicial = posicionActual
@@ -522,7 +531,7 @@ class AnalizadorLexico ( var codigoFuente:String)
 
             //Transición
             palabra += caracterActual
-            obtenerSgteCaracter();
+            obtenerSgteCaracter()
 
             if(caracterActual=='!') {
                 palabra += caracterActual
@@ -572,20 +581,112 @@ class AnalizadorLexico ( var codigoFuente:String)
 
             //Transición
             palabra += caracterActual
-            obtenerSgteCaracter();
+            obtenerSgteCaracter()
 
             if ((caracterInicial=='+' && caracterActual=='+') || (caracterInicial=='-' && caracterActual=='-')) {
                 palabra += caracterActual;
                 almacenarToken(palabra, Categoria.INCREMENTO_DECREMENTO, fila,columna)
                 obtenerSgteCaracter()
-                return true;
+                return true
             } else {
-                hacerBT(posicionInicial, columna, fila);
-                return false;
+                hacerBT(posicionInicial, columna, fila)
+                return false
             }
         }
 
         return false;
     }
 
+    fun esReservada(): Boolean {
+        if (caracterActual == '@') {
+            var palabra = ""
+            val fila = filaActual
+            val columna = columnaActual
+            val posicionInicial = posicionActual
+
+            //Transición
+            palabra += caracterActual
+            obtenerSgteCaracter()
+            while (caracterActual.isLetter()) {
+                palabra += caracterActual
+                obtenerSgteCaracter()
+            }
+            if (palabrasReservadas.contains(palabra)) {
+                almacenarToken(palabra, Categoria.PALABRA_RESERVADA, fila, columna)
+                return true
+            } else {
+                obtenerCaracterN(posicionInicial, columna, fila)
+                return false
+            }
+        }
+
+        //RI
+        return false
+    }
+
+    /**
+     * Permite ver si es un separador
+     *
+     *
+     *@return true si es un separador false si no
+     */
+    fun esSeparador(): Boolean
+    {
+        if(caracterActual == ',')
+        {
+            var palabra = ""
+            val fila = filaActual
+            val columna = columnaActual
+
+            palabra += caracterActual
+
+            almacenarToken(palabra, Categoria.SEPARADOR, fila, columna)
+            return true
+        }
+        return false
+    }
+
+    /**
+     * Permite ver si es un punto
+     *
+     *
+     *@return true si es un punto false si no
+     */
+    fun esPunto(): Boolean
+    {
+        if(caracterActual == '.')
+        {
+            var palabra = ""
+            val fila = filaActual
+            val columna = columnaActual
+
+            palabra += caracterActual
+
+            almacenarToken(palabra, Categoria.PUNTO, fila, columna)
+            return true
+        }
+        return false
+    }
+
+    /**
+     * Permite ver si son dos puntos
+     *
+     *
+     *@return true si son dos puntos false si no
+     */
+    fun esDosPuntos(): Boolean
+    {
+        if(caracterActual == ':')
+        {
+            var palabra = ""
+            val fila = filaActual
+            val columna = columnaActual
+
+            palabra += caracterActual
+
+            almacenarToken(palabra, Categoria.DOS_PUNTOS, fila, columna)
+            return true
+        }
+        return false
+    }
 }
