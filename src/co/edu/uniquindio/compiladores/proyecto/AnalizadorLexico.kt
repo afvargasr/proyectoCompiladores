@@ -494,10 +494,13 @@ class AnalizadorLexico ( var codigoFuente:String)
             //Transición
             palabra += caracterActual
             obtenerSgteCaracter()
-            while (caracterActual >= Char(32) && caracterActual <= Char(255)) {
+            while (caracterActual != '\n') {
                 palabra += caracterActual
                 obtenerSgteCaracter()
             }
+
+            almacenarToken(palabra, Categoria.COMENTARIO_LINEA, fila, columna)
+            return true
         }
 
         //RI
@@ -695,7 +698,6 @@ class AnalizadorLexico ( var codigoFuente:String)
 	 * 
 	 *@return true si es una palabra reservada false si no
 	 */
-	
     fun esReservada(): Boolean {
         if (caracterActual == '@') {
             var palabra = ""
