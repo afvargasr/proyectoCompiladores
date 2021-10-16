@@ -1,4 +1,4 @@
-package co.edu.uniquindio.compiladores.proyecto
+package co.edu.uniquindio.compiladores.proyecto.lexico
 
 import co.edu.uniquindio.compiladores.proyecto.excepciones.ReporteErrorException
 
@@ -18,7 +18,7 @@ class AnalizadorLexico ( var codigoFuente:String)
     var finCodigo = 0.toChar()
     var palabrasReservadas = listOf<String>("@int", "@void", "@text", "@get", "@set", "@final", "@for", "@while", "@int", "@if", "@boolean")
 
-    fun almacenarToken(palabra:String ,categoria:Categoria,fila:Int, columna:Int ) = listaTokens.add(Token(palabra, categoria, fila, columna))
+    fun almacenarToken(palabra:String, categoria: Categoria, fila:Int, columna:Int ) = listaTokens.add(Token(palabra, categoria, fila, columna))
 
     fun hacerBT(posicionInicial:Int, columna:Int, fila:Int) {
 

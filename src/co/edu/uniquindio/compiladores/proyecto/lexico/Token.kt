@@ -1,4 +1,4 @@
-package co.edu.uniquindio.compiladores.proyecto
+package co.edu.uniquindio.compiladores.proyecto.lexico
 
 
 /**
@@ -8,7 +8,7 @@ package co.edu.uniquindio.compiladores.proyecto
  *   @author Andres Felipe Betancourt
  *
  */
-class Token (var palabra:String, var categoria:Categoria, var fila:Int, var columna:Int ) {
+class Token (var palabra:String, var categoria: Categoria, var fila:Int, var columna:Int ) {
 
 
     override fun toString(): String {

@@ -1,4 +1,4 @@
-package co.edu.uniquindio.compiladores.proyecto
+package co.edu.uniquindio.compiladores.proyecto.lexico
 
 /**
  * Definicion de las categorias lexicas del lenguaje 
