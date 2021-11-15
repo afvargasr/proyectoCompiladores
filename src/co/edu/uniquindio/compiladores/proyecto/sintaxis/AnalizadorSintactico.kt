@@ -39,7 +39,7 @@ class AnalizadorSintactico(var listaToken:ArrayList<Token>) {
     }
 
     /**
-     * <Elemento> ::= <DeclaracionVariable>  | <ListaFunciones>
+     * <Elemento> ::= [<ListaImports>] | <DeclaracionVariable> | <ListaFunciones>
      */
     fun esElemento(): Elemento? {
         return null
