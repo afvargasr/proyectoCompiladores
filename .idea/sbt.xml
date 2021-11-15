@@ -2,6 +2,6 @@
 <project version="4">
   <component name="ScalaSbtSettings">
     <option name="customVMEnabled" value="true" />
-    <option name="customVMPath" value="$PROJECT_DIR$/../../../../../../../Program Files/Java/jre1.8.0_301" />
+    <option name="customVMPath" value="$PROJECT_DIR$/../../../../../../../Program Files/Java/jre1.8.0_312" />
   </component>
 </project>
