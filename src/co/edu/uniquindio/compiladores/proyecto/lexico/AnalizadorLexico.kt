@@ -46,7 +46,12 @@ class AnalizadorLexico ( var codigoFuente:String)
             if (esIdentificador()) continue
             if (esReservada()) continue
             if (esOperadorLogico()) continue
-            if (esAgrupador()) continue
+            if (esParentesisIzquierdo()) continue
+            if (esParentesisDerecho()) continue
+            if (esCorcheteIzquierdo()) continue
+            if (esCorcheteDerecho()) continue
+            if (esLlaveIzquierda()) continue
+            if (esLlaveDerecha()) continue
             if (esOperadorRelacional()) continue
             if (esAsignacion()) continue
             if (esIncrementoODecremento()) continue
@@ -593,19 +598,124 @@ class AnalizadorLexico ( var codigoFuente:String)
     }
 
     /**
-	 * Permite ver si es un agrupador
+	 * Permite ver si es un parentesis izquierdo
 	 * 
-	 * 
+	 *
 	 *@return true si es un agrupador false si no
 	 */
-    fun esAgrupador(): Boolean {
-        if (caracterActual == '(' || caracterActual == ')' || caracterActual == '[' || caracterActual == ']' || caracterActual == '{' || caracterActual == '}') {
+    fun esParentesisIzquierdo(): Boolean {
+        if (caracterActual == '(' ) {
             var palabra = caracterActual.toString()
             val fila = filaActual
             val columna = columnaActual
             val posicionInicial = posicionActual
 
-            almacenarToken(palabra, Categoria.AGRUPADOR, fila, columna)
+            almacenarToken(palabra, Categoria.PARENTESIS_IZQUIERDO, fila, columna)
+            obtenerSgteCaracter()
+            return true
+        }
+        //RI
+        return false
+    }
+
+    /**
+     * Permite ver si es un parentesis derecho
+     *
+     *
+     *@return true si es un agrupador false si no
+     */
+    fun esParentesisDerecho(): Boolean {
+        if (caracterActual == ')') {
+            var palabra = caracterActual.toString()
+            val fila = filaActual
+            val columna = columnaActual
+            val posicionInicial = posicionActual
+
+            almacenarToken(palabra, Categoria.PARENTESIS_DERECHO, fila, columna)
+            obtenerSgteCaracter()
+            return true
+        }
+        //RI
+        return false
+    }
+
+    /**
+     * Permite ver si es un corchete izquierdo
+     *
+     *
+     *@return true si es un agrupador false si no
+     */
+    fun esCorcheteIzquierdo(): Boolean {
+        if (caracterActual == '[') {
+            var palabra = caracterActual.toString()
+            val fila = filaActual
+            val columna = columnaActual
+            val posicionInicial = posicionActual
+
+            almacenarToken(palabra, Categoria.CORCHETE_IZQUIERDO, fila, columna)
+            obtenerSgteCaracter()
+            return true
+        }
+        //RI
+        return false
+    }
+
+    /**
+     * Permite ver si es un corchete derecho
+     *
+     *
+     *@return true si es un agrupador false si no
+     */
+    fun esCorcheteDerecho(): Boolean {
+        if (caracterActual == ']') {
+            var palabra = caracterActual.toString()
+            val fila = filaActual
+            val columna = columnaActual
+            val posicionInicial = posicionActual
+
+            almacenarToken(palabra, Categoria.CORCHETE_DERECHO, fila, columna)
+            obtenerSgteCaracter()
+            return true
+        }
+        //RI
+        return false
+    }
+
+    /**
+     * Permite ver si es una llave izquierdo
+     *
+     *
+     *@return true si es un agrupador false si no
+     */
+    fun esLlaveIzquierda(): Boolean {
+        if (caracterActual == '{') {
+            var palabra = caracterActual.toString()
+            val fila = filaActual
+            val columna = columnaActual
+            val posicionInicial = posicionActual
+
+            almacenarToken(palabra, Categoria.LLAVE_IZQUIERDA, fila, columna)
+            obtenerSgteCaracter()
+            return true
+        }
+        //RI
+        return false
+    }
+
+    /**
+     * Permite ver si es una llave derecha
+     *
+     *
+     *@return true si es un agrupador false si no
+     */
+    fun esLlaveDerecha(): Boolean {
+        if (caracterActual == '}') {
+            var palabra = caracterActual.toString()
+            val fila = filaActual
+            val columna = columnaActual
+            val posicionInicial = posicionActual
+
+            almacenarToken(palabra, Categoria.LLAVE_DERECHA, fila, columna)
             obtenerSgteCaracter()
             return true
         }
