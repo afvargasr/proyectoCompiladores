@@ -1,11 +1,15 @@
 package co.edu.uniquindio.compiladores.proyecto.sintaxis
 
+import co.edu.uniquindio.compiladores.proyecto.lexico.Categoria
 import co.edu.uniquindio.compiladores.proyecto.lexico.Token
+import co.edu.uniquindio.compiladores.proyecto.lexico.Error
+
 
 class AnalizadorSintactico(var listaToken:ArrayList<Token>) {
 
     var posicionActual = 0
-    var tokenActual = listaToken[0]
+    var tokenActual = listaToken[posicionActual]
+    var listaErrores = ArrayList<Error>()
 
     fun obtenerSiguienteToken() {
         posicionActual++
@@ -13,6 +17,13 @@ class AnalizadorSintactico(var listaToken:ArrayList<Token>) {
         if (posicionActual < listaToken.size) {
             tokenActual = listaToken[posicionActual]
         }
+    }
+
+    /**
+     * Reporte de errores
+     */
+    fun reportarError(mensaje: String){
+
     }
 
     /**
@@ -42,6 +53,488 @@ class AnalizadorSintactico(var listaToken:ArrayList<Token>) {
      * <Elemento> ::= [<ListaImports>] | <DeclaracionVariable> | <ListaFunciones>
      */
     fun esElemento(): Elemento? {
+
+        var listaImports = esListaImports()
+
+        var declaracionVariable = esDeclaracionVariable()
+
+        if(declaracionVariable  != null)
+        {
+            obtenerSiguienteToken()
+
+            var listaFuncion = esListaFunciones()
+
+            if(listaFuncion != null)
+            {
+                obtenerSiguienteToken()
+               // el elemento esta bien escrito
+                return Elemento(listaImports, declaracionVariable, listaFuncion)
+            }
+            else
+            {
+                reportarError("Falta las funciones en el elemento")
+            }
+
+        }
+        else
+        {
+            reportarError("Falta la declaración de variable en el elemento")
+        }
+
+        return null
+    }
+
+    /**
+     * <ListaImports> ::= <Import>[<ListaImports>]
+     */
+    fun esListaImports(): ArrayList<Import>{
+
+        var listaImports = ArrayList<Import>()
+        var import = esImport()
+
+        while (import!=null){
+            listaImports.add(import)
+        }
+        return listaImports
+
+    }
+
+    /**
+     * <Import> ::= import identificador”;”
+     */
+    fun esImport(): Import?
+    {
+        if (tokenActual.categoria == Categoria.PALABRA_RESERVADA && tokenActual.palabra == "import") {
+            obtenerSiguienteToken()
+
+            if(tokenActual.categoria == Categoria.IDENTIFICADOR)
+            {
+                var identificador = tokenActual.palabra
+
+                obtenerSiguienteToken()
+
+                if(tokenActual.categoria == Categoria.FIN_SENTENCIA)
+                {
+                    obtenerSiguienteToken()
+                    //El import esta bien escrito
+                    return Import(identificador)
+                }
+
+
+            }
+
+        }
+
+        return null
+    }
+
+
+    /**
+     * <DeclaracionVariableMutable> ::= var <tipoDato> identificador " = " <Expresion>”;”
+     */
+    fun esDeclaracionVariable(): DeclaracionVariable? {
+        if (tokenActual.categoria == Categoria.PALABRA_RESERVADA && tokenActual.palabra == "var") {
+            obtenerSiguienteToken()
+
+            var tipoDato = esTipoDato()
+
+            if(tipoDato!=null)
+            {
+            obtenerSiguienteToken()
+
+            if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
+                var identificador = tokenActual.palabra
+                obtenerSiguienteToken()
+
+                if (tokenActual.categoria == Categoria.OPERADOR_ASIGNACION && tokenActual.palabra == "=") {
+                    obtenerSiguienteToken()
+
+                    var expresion = esExpresion()
+
+                    if (expresion != null) {
+
+                        obtenerSiguienteToken()
+
+                        if(tokenActual.categoria == Categoria.FIN_SENTENCIA)
+                            {
+                                obtenerSiguienteToken()
+                              //la declaracion de la variable esta bien escrita
+                            return DeclaracionVariable(tipoDato.palabra,identificador,expresion)
+                            }
+                    }
+                    else
+                    {
+                        reportarError("Falta la expresion en la declaración de la variable")
+                    }
+
+                }
+
+                }
+
+            }
+            else
+            {
+                reportarError("Falta el tipo de dato en la declaración de la variable")
+            }
+        }
+
+        return null
+    }
+
+    /**
+     * <ListaExpresiones> ::= <Expresion> | <ListaExpresiones>
+     */
+    fun esListaExpresion(): ArrayList<Expresion>
+    {
+        var listaExpresion = ArrayList<Expresion>()
+        var expresion = esExpresion()
+
+        while (expresion!=null){
+            listaExpresion.add(expresion)
+        }
+        return listaExpresion
+    }
+
+    /**
+     * <Expresion> ::= [<Relacional>] | [<Logico>] | [<Aritmetico>] | [<ExpresionCadena>]
+     */
+    fun esExpresion(): Expresion?
+    {
+
+        var relacional = esRelacional()
+
+        var logico =  esLogico()
+
+        var aritmetico = esAritmetico()
+
+        var expresionCadena = esExpresionCadena()
+
+
+        if(relacional!=null)
+        {
+            return Expresion(relacional)
+        }
+        else
+            if (logico!=null)
+            {
+                return Expresion(logico)
+            }
+        else
+            if(aritmetico!=null)
+            {
+                return Expresion(aritmetico)
+            }
+        else
+            if(expresionCadena!=null)
+            {
+                return Expresion(expresionCadena)
+            }
+
+        reportarError("No se detectó ninguna expresión")
+
+        return null
+    }
+
+    /**
+     *<Relacional>  ::= identificador OperadorRelacional  identificador
+     */
+    fun esRelacional(): Relacional? {
+        if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
+            var identificador1 = tokenActual.palabra
+            obtenerSiguienteToken()
+
+            if (tokenActual.categoria == Categoria.OPERADOR_RELACIONAL) {
+                var operador = tokenActual.palabra
+                obtenerSiguienteToken()
+
+                if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
+                    var identificador2 = tokenActual.palabra
+                    obtenerSiguienteToken()
+
+                    //La expresión relacional esta bien escrita
+                    return Relacional(identificador1, operador, identificador2)
+
+                }
+            }
+        }
+        return null
+    }
+
+    /**
+     * <Logico> ::= valor OperadorLogico valor
+     */
+    fun esLogico(): Logico?
+    {
+        if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
+            var identificador1 = tokenActual.palabra
+            obtenerSiguienteToken()
+
+            if (tokenActual.categoria == Categoria.OPERADOR_LOGICO) {
+                var operador = tokenActual.palabra
+                obtenerSiguienteToken()
+
+                if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
+                    var identificador2 = tokenActual.palabra
+                    obtenerSiguienteToken()
+
+                    //La expresión relacional esta bien escrita
+                    return Logico(identificador1, operador, identificador2)
+
+                }
+            }
+        }
+        return null
+    }
+
+
+    /**
+     * <Aritmetico> ::= valor OperadorAritmetico valor
+     */
+    fun esAritmetico(): Aritmetico?
+    {
+        if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
+            var identificador1 = tokenActual.palabra
+            obtenerSiguienteToken()
+
+            if (tokenActual.categoria == Categoria.OPERADOR_ARTIMETICO) {
+                var operador = tokenActual.palabra
+                obtenerSiguienteToken()
+
+                if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
+                    var identificador2 = tokenActual.palabra
+                    obtenerSiguienteToken()
+
+                    //La expresión relacional esta bien escrita
+                    return Aritmetico(identificador1, operador, identificador2)
+
+                }
+            }
+        }
+        return null
+    }
+
+    /**
+     * <ExpresionCadena> ::= CadenaCaracteres [+ <Expresion>] | <Expresion> + CadenaCaracteres
+     */
+    fun esExpresionCadena(): ExpresionCadena?
+    {
+            if(tokenActual.categoria == Categoria.CADENA_CARACTERES)
+            {
+                var cadena1 = tokenActual.palabra
+
+                obtenerSiguienteToken()
+
+                if(tokenActual.categoria == Categoria.OPERADOR_ARTIMETICO && tokenActual.palabra == "+")
+                {
+
+                    var expresion = esExpresion()
+
+                    obtenerSiguienteToken()
+                    return ExpresionCadena(cadena1, expresion)
+
+                }
+            } else
+            {
+                var expresion2 = esExpresion()
+
+                if(expresion2!=null)
+                {
+                    obtenerSiguienteToken()
+
+                    if(tokenActual.categoria == Categoria.OPERADOR_ARTIMETICO && tokenActual.palabra == "+")
+                    {
+                        if(tokenActual.categoria == Categoria.CADENA_CARACTERES) {
+                            var cadena2 = tokenActual.palabra
+
+                            obtenerSiguienteToken()
+
+                            return ExpresionCadena(cadena2, expresion2)
+                        }
+
+                    }
+                }
+            }
+        return null
+    }
+
+    /**
+     * <DeclaracionVariableInmutable> ::= cons <tipoDato> identificador " = " <Expresion>”;”
+     */
+    fun esDeclaracionVariableI(): DeclaracionVariableI? {
+        if (tokenActual.categoria == Categoria.PALABRA_RESERVADA && tokenActual.palabra == "cons") {
+            obtenerSiguienteToken()
+
+            var tipoDato = esTipoDato()
+
+            if(tipoDato!=null)
+            {
+                obtenerSiguienteToken()
+
+                if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
+                    var identificador = tokenActual.palabra
+                    obtenerSiguienteToken()
+
+                    if (tokenActual.categoria == Categoria.OPERADOR_ASIGNACION && tokenActual.palabra == "=") {
+                        obtenerSiguienteToken()
+
+                        var expresion = esExpresion()
+
+                        if (expresion != null) {
+
+                            obtenerSiguienteToken()
+
+                            if(tokenActual.categoria == Categoria.FIN_SENTENCIA)
+                            {
+                                obtenerSiguienteToken()
+                                //la declaracion de la variable esta bien escrita
+                                return DeclaracionVariableI(tipoDato.palabra,identificador,expresion)
+                            }
+                        }
+                        else
+                        {
+                            reportarError("Falta la expresion en la declaración de la variable inmutable")
+                        }
+
+                    }
+
+                }
+
+            }
+            else
+            {
+                reportarError("Falta el tipo de dato en la declaración de la variable inmutable")
+            }
+        }
+
+        return null
+    }
+
+
+    /**
+     * <ListaFunciones>  ::=  <Funcion> [<ListaFunciones>]
+     */
+    fun esListaFunciones(): ArrayList<Funcion>{
+
+        var listaFunciones = ArrayList<Funcion>()
+        var funcion = esFuncion()
+
+        while (funcion!=null){
+            listaFunciones.add(funcion)
+        }
+        return listaFunciones
+    }
+
+    /**
+     * <Funcion> ::= fun identificador “(“ [<ListaParametros>] ”)”
+     * :<TipoRetorno> “{“ <ListaSentencias> “}”
+     */
+    fun esFuncion(): Funcion? {
+
+        if (tokenActual.categoria == Categoria.PALABRA_RESERVADA && tokenActual.palabra == "fun") {
+            obtenerSiguienteToken()
+
+            if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
+                var identificador = tokenActual.palabra
+                obtenerSiguienteToken()
+
+                if (tokenActual.categoria == Categoria.PARENTESIS_IZQUIERDO) {
+                    obtenerSiguienteToken()
+
+                    var ListaParametros = esListaParametros()
+
+                    if (tokenActual.categoria == Categoria.PARENTESIS_DERECHO) {
+                        obtenerSiguienteToken()
+
+                        if (tokenActual.categoria == Categoria.DOS_PUNTOS) {
+                            obtenerSiguienteToken()
+
+                            var tipoRetorno = esTipoRetorno()
+
+                            if (tipoRetorno != null) {
+                                obtenerSiguienteToken()
+
+                                var listaSentencias = esListaSentencias()
+
+                                if (listaSentencias != null) {
+
+                                    obtenerSiguienteToken()
+                                    //la función esta bien escrita
+                                    return Funcion(identificador, ListaParametros, tipoRetorno.palabra, listaSentencias)
+                                }
+                                else
+                                {
+                                    reportarError("Falta la lista de sentencias en la función")
+                                }
+                            } else {
+                                reportarError("Falta el tipo de retorno en la función")
+                            }
+                        }
+                        else
+                        {
+                            reportarError("Faltan los dos puntos antes del tipo de retorno en la función")
+                        }
+                    }
+                    else
+                    {
+                        reportarError("La lista de parametros debe cerrar con parentesis derecho")
+                    }
+                }
+                else
+                {
+                    reportarError("La lista de parametros debe iniciar con parentesis izquierdo")
+                }
+
+            }
+            else
+            {
+                reportarError("La función debe llevar un identificador")
+            }
+        }else
+        {
+            reportarError("Debe iniciar con la palabra fun")
+        }
+            return null
+        }
+
+
+    /**
+     * <TipoRetorno> ::= int | float | boolean | string | void
+     */
+    fun esTipoRetorno(): Token? {
+
+            if (tokenActual.categoria == Categoria.PALABRA_RESERVADA) {
+
+
+                if (tokenActual.palabra == "int" || tokenActual.palabra == "float"
+                    || tokenActual.palabra == "boolean" || tokenActual.palabra == "string" || tokenActual.palabra == "void"
+                ) {
+                    obtenerSiguienteToken()
+                    return tokenActual
+                }
+
+            }
+            return null
+        }
+
+
+    /**
+     * <TipoDato> ::= int | boolean | string | float
+     */
+    fun esTipoDato(): Token? {
+
+        if (tokenActual.categoria == Categoria.PALABRA_RESERVADA) {
+
+
+            if (tokenActual.palabra == "int" || tokenActual.palabra == "float"
+                || tokenActual.palabra == "boolean" || tokenActual.palabra == "string")
+            {
+                obtenerSiguienteToken()
+                return tokenActual
+            }
+
+        }
         return null
     }
 }
+
+

@@ -16,7 +16,8 @@ class AnalizadorLexico ( var codigoFuente:String)
     var caracterActual = codigoFuente[0]
     var listaTokens =  ArrayList<Token>()
     var finCodigo = 0.toChar()
-    var palabrasReservadas = listOf<String>("@int", "@void", "@text", "@get", "@set", "@final", "@for", "@while", "@int", "@if", "@boolean")
+    var palabrasReservadas = listOf<String>("int", "void", "float", "var","fun","final","for","while","String","if","boolean",
+        "cons","import","return","else", "print")
 
     fun almacenarToken(palabra:String, categoria: Categoria, fila:Int, columna:Int ) = listaTokens.add(Token(palabra, categoria, fila, columna))
 
@@ -809,7 +810,7 @@ class AnalizadorLexico ( var codigoFuente:String)
 	 *@return true si es una palabra reservada false si no
 	 */
     fun esReservada(): Boolean {
-        if (caracterActual == '@') {
+
             var palabra = ""
             val fila = filaActual
             val columna = columnaActual
@@ -829,7 +830,7 @@ class AnalizadorLexico ( var codigoFuente:String)
                 obtenerCaracterN(posicionInicial, columna, fila)
                 return false
             }
-        }
+
 
         //RI
         return false
