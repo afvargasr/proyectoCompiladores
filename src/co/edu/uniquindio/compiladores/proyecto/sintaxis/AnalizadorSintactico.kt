@@ -440,7 +440,7 @@ class AnalizadorSintactico(var listaToken:ArrayList<Token>) {
                 if (tokenActual.categoria == Categoria.PARENTESIS_IZQUIERDO) {
                     obtenerSiguienteToken()
 
-                    var ListaParametros = esListaParametros()
+                    var listaParametros = esListaParametros()
 
                     if (tokenActual.categoria == Categoria.PARENTESIS_DERECHO) {
                         obtenerSiguienteToken()
@@ -459,7 +459,7 @@ class AnalizadorSintactico(var listaToken:ArrayList<Token>) {
 
                                     obtenerSiguienteToken()
                                     //la función esta bien escrita
-                                    return Funcion(identificador, ListaParametros, tipoRetorno.palabra, listaSentencias)
+                                    return Funcion(identificador, listaParametros, tipoRetorno.palabra, listaSentencias)
                                 }
                                 else
                                 {
@@ -535,6 +535,519 @@ class AnalizadorSintactico(var listaToken:ArrayList<Token>) {
         }
         return null
     }
+
+
+    /**
+     * <ListaParametros> ::= <Parámetro> [“,”<ListaParametros>]
+     */
+    fun esListaParametros(): ArrayList<Parametro>? {
+        var listaParametros = ArrayList<Parametro>()
+        var parametro = esParametro()
+        while (parametro != null) {
+            listaParametros.add(parametro)
+            if (tokenActual.categoria == Categoria.SEPARADOR) {
+                obtenerSiguienteToken()
+                parametro = esParametro()
+            } else {
+                if (tokenActual.categoria != Categoria.PARENTESIS_DERECHO) {
+                    reportarError("Falta una coma en la lista de paramentros")
+                }
+                break
+            }
+        }
+        return listaParametros
+    }
+
+    /**
+     * <Parámetro> ::= <TipoDato> identificador
+     */
+    fun esParametro(): Parametro? {
+        val tipoDato = esTipoDato()
+        if (tipoDato != null) {
+            obtenerSiguienteToken()
+            if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
+                obtenerSiguienteToken()
+                return Parametro(tipoDato, tokenActual)
+            } else {
+                reportarError("El nombre del parametro esta incorrecto")
+            }
+        } else {
+            reportarError("El tipo de dato es incorrecto")
+        }
+        return null
+    }
+
+    /**
+     * <Retorno> ::= return identificador”;”
+     */
+    fun esRetorno(): Retorno? {
+        if (tokenActual.categoria == Categoria.PALABRA_RESERVADA && tokenActual.palabra == "return") {
+            obtenerSiguienteToken()
+            if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
+                var identificador = tokenActual.palabra
+                obtenerSiguienteToken()
+                if (tokenActual.categoria == Categoria.FIN_SENTENCIA) {
+                    return Retorno(identificador)
+                } else {
+                    reportarError("No se encuentra el fin de la sentencia")
+                }
+            } else {
+                reportarError("El nombre del identificador esta incorrecto")
+            }
+        } else {
+            reportarError("No se encuentra la palabra reservada 'return'")
+        }
+
+        return null
+    }
+
+    /**
+     * <ListaSentencias> ::= <Sentencia> [<ListaSentencias>]
+     */
+    fun esListaSentencias(): ArrayList<Sentencia> {
+        var listaSentencias = ArrayList<Sentencia>()
+        var sentencia = esSentencia()
+        while (sentencia != null) {
+            listaSentencias.add(sentencia)
+            sentencia = esSentencia()
+        }
+        return listaSentencias
+    }
+
+    /**
+     * <Sentencia> ::= <Decision> | <DeclaracionVariableMutable> | <DeclaracionVariableInmutable> | <Asignacion> | <ImpresionDatos> | <Ciclo> | <DeclaracionArreglos> | <InicializacionArreglos> | <Retorno> | <LecturaDatos> | <InvocacionFuncion> | <Incremento> | <Decremento>
+     */
+    fun esSentencia(): Sentencia? {
+        val decision = esDecision()
+        val declaracionVariableMutable = esDeclaracionVariable()
+        val declaracionVariableInmutable = esDeclaracionVariableI()
+        val asignacion = esAsignacion()
+        val impresionDatos = esImpresionDatos()
+        val ciclo = esCiclo()
+        val declaracionArreglos = esDeclaracionArreglos()
+        val inicializacionArreglos = esInicializacionArreglos()
+        val retorno = esRetorno()
+        val lecturaDatos = esLecturaDatos()
+        val invocacionFuncion = esInvocacionFuncion()
+        val incremento = esIncremento()
+        val decremento = esDecremento()
+        if (decision != null) {
+            return Sentencia(decision)
+        } else if (declaracionVariableMutable != null) {
+            return Sentencia(declaracionVariableMutable)
+        } else if (declaracionVariableInmutable != null) {
+            return Sentencia(declaracionVariableInmutable)
+        } else if (asignacion != null) {
+            return Sentencia(asignacion)
+        } else if (impresionDatos != null) {
+            return Sentencia(impresionDatos)
+        } else if (ciclo != null) {
+            return Sentencia(ciclo)
+        } else if (declaracionArreglos != null) {
+            return Sentencia(declaracionArreglos)
+        } else if (inicializacionArreglos != null) {
+            return Sentencia(inicializacionArreglos)
+        } else if (retorno != null) {
+            return Sentencia(retorno)
+        } else if (lecturaDatos != null) {
+            return Sentencia(lecturaDatos)
+        } else if (invocacionFuncion != null) {
+            return Sentencia(invocacionFuncion)
+        } else if (incremento != null) {
+            return Sentencia(incremento)
+        } else if (decremento != null) {
+            return Sentencia(decremento)
+        }
+        reportarError("No se encuentra nunguna sentencia")
+        return null
+    }
+
+    /**
+     * <Decision> ::= if “(” <ListaExpresiones> “)” “{” <ListaSentencias> “}” [else “{” <ListaSentencias> “}”]
+     */
+    fun esDecision(): Decision? {
+        if (tokenActual.categoria == Categoria.PALABRA_RESERVADA && tokenActual.palabra == "if") {
+            obtenerSiguienteToken()
+            if (tokenActual.categoria == Categoria.PARENTESIS_IZQUIERDO) {
+                val expresiones = esListaExpresion()
+                obtenerSiguienteToken()
+                if (expresiones != null) {
+                    if (tokenActual.categoria == Categoria.PARENTESIS_DERECHO) {
+                        obtenerSiguienteToken()
+                        if (tokenActual.categoria == Categoria.LLAVE_IZQUIERDA) {
+                            obtenerSiguienteToken()
+                            val sentenciasIf = esListaSentencias()
+                            if (sentenciasIf != null) {
+                                if (tokenActual.categoria == Categoria.LLAVE_DERECHA) {
+                                    obtenerSiguienteToken()
+                                    if (tokenActual.categoria == Categoria.PALABRA_RESERVADA && tokenActual.palabra == "else") {
+                                        obtenerSiguienteToken()
+                                        if (tokenActual.categoria == Categoria.LLAVE_IZQUIERDA) {
+                                            obtenerSiguienteToken()
+                                            val sentenciasElse = esListaSentencias()
+                                            if (sentenciasElse != null) {
+                                                if (tokenActual.categoria == Categoria.LLAVE_DERECHA) {
+                                                    obtenerSiguienteToken()
+                                                    return Decision(expresiones, sentenciasIf, sentenciasElse)
+                                                } else {
+                                                    reportarError("No se encuentra la llave derecha")
+                                                }
+                                            } else {
+                                                reportarError("No se encuentran las sentencias del else")
+                                            }
+                                        } else {
+                                            reportarError("No se encuentra la llave izquierda")
+                                        }
+                                    } else {
+                                        return Decision(expresiones, sentenciasIf, ArrayList())
+                                    }
+                                } else {
+                                    reportarError("No se encuentra la llave derecha")
+                                }
+                            } else {
+                                reportarError("No se encuentran las sentencias del if")
+                            }
+                        } else {
+                            reportarError("No se encuentra la llave izquierda")
+                        }
+                    } else {
+                        reportarError("No se encuentra el parentesis derecho")
+                    }
+                } else {
+                    reportarError("No se encuentra la expresion")
+                }
+            } else {
+                reportarError("No se encuentra el parentesis izquierdo")
+            }
+        } else {
+            reportarError("No se encuentra la palabra 'if'")
+        }
+        return null
+    }
+
+    /**
+     * <Asignacion>  ::= identificador operadorAsignacion <Expresion>”;”
+     */
+    fun esAsignacion(): Asignacion? {
+        if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
+            val identificador = tokenActual
+            obtenerSiguienteToken()
+            if (tokenActual.categoria == Categoria.OPERADOR_ASIGNACION) {
+                val operador = tokenActual
+                obtenerSiguienteToken()
+                val expresion = esExpresion()
+                if (expresion != null) {
+                    if (tokenActual.categoria == Categoria.FIN_SENTENCIA) {
+                        obtenerSiguienteToken()
+                        return Asignacion(identificador, operador, expresion)
+                    } else {
+                        reportarError("No se encuentra el fin de sentencia")
+                    }
+                } else {
+                    reportarError("No se encuentra la expresion")
+                }
+            } else {
+                reportarError("No se encuentra el operador de asignacion")
+            }
+        } else {
+            reportarError("No se encuentra el identificador")
+        }
+        return null
+    }
+
+    /**
+     * <ImpresionDatos> ::= print <CadenaCaracteres>”;”
+     */
+    fun esImpresionDatos(): ImpresionDatos? {
+        if (tokenActual.categoria == Categoria.PALABRA_RESERVADA && tokenActual.palabra == "print") {
+            obtenerSiguienteToken()
+            val cadenaCaracteres = esExpresionCadena()
+            if (cadenaCaracteres != null) {
+                if (tokenActual.categoria == Categoria.FIN_SENTENCIA) {
+                    obtenerSiguienteToken()
+                    return ImpresionDatos(cadenaCaracteres)
+                } else {
+                    reportarError("No se encuentra el fin de sentencia")
+                }
+            } else {
+                reportarError("No se encuentra la cadena de caracteres")
+            }
+        } else {
+            reportarError("No se encuentra la palabra 'print'")
+        }
+        return null
+    }
+
+    /**
+     * <Ciclo> ::= while “(” <ExpresionLogica> “)” “{” <ListaSentencias> “}”
+     */
+    fun esCiclo():Ciclo? {
+        if (tokenActual.categoria == Categoria.PALABRA_RESERVADA && tokenActual.palabra == "while") {
+            obtenerSiguienteToken()
+            if (tokenActual.categoria == Categoria.PARENTESIS_IZQUIERDO) {
+                val expresion = esLogico()
+                if (expresion != null) {
+                    if (tokenActual.categoria == Categoria.PARENTESIS_DERECHO) {
+                        obtenerSiguienteToken()
+                        if (tokenActual.categoria == Categoria.LLAVE_IZQUIERDA) {
+                            val sentencias = esListaSentencias()
+                            if (sentencias != null) {
+                                if (tokenActual.categoria == Categoria.LLAVE_DERECHA) {
+                                    obtenerSiguienteToken()
+                                    return Ciclo(expresion, sentencias)
+                                } else {
+                                    reportarError("No se encuentra la llave derecha")
+                                }
+                            } else {
+                                reportarError("No se encuentran las sentencias")
+                            }
+                        } else {
+                            reportarError("No se encuentra la llave izquierda")
+                        }
+                    } else {
+                        reportarError("No se encuentra el parentesis derecho")
+                    }
+                } else {
+                    reportarError("No se encuentra la expresion")
+                }
+            } else {
+                reportarError("No se encuentra el parentesis izquierdo")
+            }
+        } else {
+            reportarError("No se encuentra la palabra 'while'")
+        }
+        return null
+    }
+
+    /**
+     * <DeclaracionArreglos> ::= <TipoDato> identificador ”;”
+     */
+    fun esDeclaracionArreglos(): DeclaracionArreglo? {
+        val tipoDato = esTipoDato()
+        if (tipoDato != null) {
+            if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
+                val identificador = tokenActual
+                obtenerSiguienteToken()
+                if (tokenActual.categoria == Categoria.FIN_SENTENCIA) {
+                    obtenerSiguienteToken()
+                    return DeclaracionArreglo(tipoDato, identificador)
+                } else {
+                    reportarError("No se encuentra el fin de sentencia")
+                }
+            } else {
+                reportarError("No se encuentra el identificador")
+            }
+        } else {
+            reportarError("No se encuentra el tipo de dato")
+        }
+        return null
+    }
+
+    /**
+     * <InicializacionArreglos> ::= <TipoDato> identificador “=” “{” <ListaValores> “}””;”
+     */
+    fun esInicializacionArreglos(): InicializacionArreglo? {
+        val tipoDato = esTipoDato()
+        if (tipoDato != null) {
+            if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
+                val identificador = tokenActual
+                obtenerSiguienteToken()
+                if (tokenActual.categoria == Categoria.OPERADOR_ASIGNACION && tokenActual.palabra == "=") {
+                    obtenerSiguienteToken()
+                    if (tokenActual.categoria == Categoria.LLAVE_IZQUIERDA) {
+                        obtenerSiguienteToken()
+                        val valores = esListaValores()
+                        if (valores != null) {
+                            if (tokenActual.categoria == Categoria.LLAVE_DERECHA) {
+                                obtenerSiguienteToken()
+                                if (tokenActual.categoria == Categoria.FIN_SENTENCIA) {
+                                    obtenerSiguienteToken()
+                                    return InicializacionArreglo(tipoDato, identificador, valores)
+                                } else {
+                                    reportarError("No se encuentra el fin de sentencia")
+                                }
+                            } else {
+                                reportarError("No se encuentra la llave derecha")
+                            }
+                        } else {
+                            reportarError("No se encuentran los valores")
+                        }
+                    } else {
+                        reportarError("No se encuentra la llave izquierda")
+                    }
+                } else {
+                    reportarError("No se encuentra el operador '='")
+                }
+            } else {
+                reportarError("No se encuentra el identificador")
+            }
+        } else {
+            reportarError("No se encuentra el tipo de dato")
+        }
+        return null
+    }
+
+    /**
+     * <ListaValores> ::= valor [“,” <ListaValores>]
+     */
+    fun esListaValores(): ArrayList<String> {
+        var valores = ArrayList<String>()
+        if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
+            var valor = tokenActual.palabra
+            while (valor != null) {
+                valores.add(valor)
+                obtenerSiguienteToken()
+                if (tokenActual.categoria == Categoria.SEPARADOR) {
+                    obtenerSiguienteToken()
+                    valor = tokenActual.palabra
+                } else {
+                    break
+                }
+            }
+        } else {
+            reportarError("No se encuentra el valor")
+        }
+        return valores
+    }
+
+    /**
+     * <LecturaDatos> ::= identificador “=” valor”;”
+     */
+    fun esLecturaDatos(): LecturaDatos? {
+        if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
+            val identificador = tokenActual
+            obtenerSiguienteToken()
+            if (tokenActual.categoria == Categoria.OPERADOR_ASIGNACION && tokenActual.palabra == "=") {
+                obtenerSiguienteToken()
+                val valor = tokenActual
+                if (valor != null) {
+                    obtenerSiguienteToken()
+                    if (tokenActual.categoria == Categoria.FIN_SENTENCIA) {
+                        obtenerSiguienteToken()
+                        return LecturaDatos(identificador, valor)
+                    } else {
+                        reportarError("No se encuentra el fin de sentencia")
+                    }
+                } else {
+                    reportarError("No se encuentra el valor")
+                }
+            } else {
+                reportarError("No se encuentra el operador '='")
+            }
+        } else {
+            reportarError("No se encuentra el identificador")
+        }
+        return null
+    }
+
+    /**
+     * <InvocacionFuncion> ::= identificador “(“ [<ListaArgumentos>] “)””;”
+     */
+    fun esInvocacionFuncion(): Invocacion? {
+        if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
+            val identificador = tokenActual.palabra
+            obtenerSiguienteToken()
+            if (tokenActual.categoria == Categoria.PARENTESIS_IZQUIERDO) {
+                obtenerSiguienteToken()
+                val argumentos: ArrayList<Argumento> = esListaArgumentos()
+                if (tokenActual.categoria == Categoria.PARENTESIS_DERECHO) {
+                    obtenerSiguienteToken()
+                    if (tokenActual.categoria == Categoria.FIN_SENTENCIA) {
+                        obtenerSiguienteToken()
+                        return Invocacion(identificador, argumentos)
+                    } else {
+                        reportarError("No se encuentra el fin de sentencia")
+                    }
+                } else {
+                    reportarError("No se encuentra el parentesis derecho")
+                }
+            } else {
+                reportarError("No se encuentra el parentesis izquierdo")
+            }
+        } else {
+            reportarError("No se encuentra el identificador")
+        }
+        return null
+    }
+
+    /**
+     * <ListaArgumentos> ::= <Argumento> [“,” <ListaArgumentos>]
+     */
+    fun esListaArgumentos(): ArrayList<Argumento> {
+        var listaArgumentos = ArrayList<Argumento>()
+        var argumento = esArgumento()
+        while (argumento != null) {
+            listaArgumentos.add(argumento)
+            if (tokenActual.categoria == Categoria.SEPARADOR) {
+                obtenerSiguienteToken()
+                argumento = esArgumento()
+            } else {
+                if (tokenActual.categoria != Categoria.PARENTESIS_DERECHO) {
+                    reportarError("Falta una coma en la lista de paramentros")
+                }
+                break
+            }
+        }
+        return listaArgumentos
+    }
+
+    /**
+     * <Argumento> ::= identificador
+     */
+    fun esArgumento(): Argumento? {
+        if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
+            val identificador = tokenActual
+            obtenerSiguienteToken()
+            return Argumento(identificador)
+        }
+        return null
+    }
+
+    /**
+     * <Incremento> ::= identificador “++””;”
+     */
+    fun esIncremento(): Incremento? {
+        if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
+            val identificador = tokenActual
+            obtenerSiguienteToken()
+            if (tokenActual.categoria == Categoria.INCREMENTO_DECREMENTO && tokenActual.palabra == "++") {
+                obtenerSiguienteToken()
+                if (tokenActual.categoria == Categoria.FIN_SENTENCIA) {
+                    obtenerSiguienteToken()
+                    return Incremento(identificador)
+                } else {
+                    reportarError("No se encuentra el fin de sentencia")
+                }
+            } else {
+                reportarError("No se encuentra el operador '++'")
+            }
+        } else {
+            reportarError("No se encuentra el identificador")
+        }
+        return null
+    }
+
+    /**
+     * <Decremento> ::= identificador “--””;”
+     */
+    fun esDecremento(): Decremento? {
+        if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
+            val identificador = tokenActual
+            obtenerSiguienteToken()
+            if (tokenActual.categoria == Categoria.INCREMENTO_DECREMENTO && tokenActual.palabra == "--") {
+                obtenerSiguienteToken()
+                if (tokenActual.categoria == Categoria.FIN_SENTENCIA) {
+                    obtenerSiguienteToken()
+                    return Decremento(identificador)
+                } else {
+                    reportarError("No se encuentra el fin de sentencia")
+                }
+            } else {
+                reportarError("No se encuentra el operador '--'")
+            }
+        } else {
+            reportarError("No se encuentra el identificador")
+        }
+        return null
+    }
 }
-
-
