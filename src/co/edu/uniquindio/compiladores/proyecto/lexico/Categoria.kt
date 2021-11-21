@@ -1,14 +1,13 @@
 package co.edu.uniquindio.compiladores.proyecto.lexico
 
 /**
- * Definicion de las categorias lexicas del lenguaje 
+ * Definicion de las categorias lexicas del lenguaje
  * @author Laura Daniela Florez Polania
  *  @author Alex Ferney Vargas
  *   @author Andres Felipe Betancourt
  *
  */
-enum class Categoria
-{
+enum class Categoria {
     IDENTIFICADOR,
     PALABRA_RESERVADA,
     ENTERO,

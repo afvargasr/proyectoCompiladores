@@ -4,8 +4,7 @@ import co.edu.uniquindio.compiladores.proyecto.lexico.Categoria
 import co.edu.uniquindio.compiladores.proyecto.lexico.Token
 import co.edu.uniquindio.compiladores.proyecto.lexico.Error
 
-
-class AnalizadorSintactico(var listaToken:ArrayList<Token>) {
+class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
 
     var posicionActual = 0
     var tokenActual = listaToken[posicionActual]
@@ -19,11 +18,16 @@ class AnalizadorSintactico(var listaToken:ArrayList<Token>) {
         }
     }
 
+    fun hacerBT(posicionInicial: Int) {
+        posicionActual = posicionInicial
+        tokenActual = listaToken[posicionActual]
+    }
+
     /**
      * Reporte de errores
      */
-    fun reportarError(mensaje: String){
-
+    fun reportarError(mensaje: String) {
+        listaErrores.add(Error(mensaje, tokenActual.fila, tokenActual.columna))
     }
 
     /**
@@ -57,27 +61,22 @@ class AnalizadorSintactico(var listaToken:ArrayList<Token>) {
         var listaImports = esListaImports()
 
         var declaracionVariable = esDeclaracionVariable()
+        println("DV" + declaracionVariable)
 
-        if(declaracionVariable  != null)
-        {
+        if (declaracionVariable != null) {
             obtenerSiguienteToken()
 
             var listaFuncion = esListaFunciones()
 
-            if(listaFuncion != null)
-            {
+            if (listaFuncion != null) {
                 obtenerSiguienteToken()
-               // el elemento esta bien escrito
+                // el elemento esta bien escrito
                 return Elemento(listaImports, declaracionVariable, listaFuncion)
-            }
-            else
-            {
+            } else {
                 reportarError("Falta las funciones en el elemento")
             }
 
-        }
-        else
-        {
+        } else {
             reportarError("Falta la declaración de variable en el elemento")
         }
 
@@ -87,13 +86,14 @@ class AnalizadorSintactico(var listaToken:ArrayList<Token>) {
     /**
      * <ListaImports> ::= <Import>[<ListaImports>]
      */
-    fun esListaImports(): ArrayList<Import>{
+    fun esListaImports(): ArrayList<Import> {
 
         var listaImports = ArrayList<Import>()
         var import = esImport()
 
-        while (import!=null){
+        while (import != null) {
             listaImports.add(import)
+            import = esImport()
         }
         return listaImports
 
@@ -102,19 +102,16 @@ class AnalizadorSintactico(var listaToken:ArrayList<Token>) {
     /**
      * <Import> ::= import identificador”;”
      */
-    fun esImport(): Import?
-    {
+    fun esImport(): Import? {
         if (tokenActual.categoria == Categoria.PALABRA_RESERVADA && tokenActual.palabra == "import") {
             obtenerSiguienteToken()
 
-            if(tokenActual.categoria == Categoria.IDENTIFICADOR)
-            {
+            if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
                 var identificador = tokenActual.palabra
 
                 obtenerSiguienteToken()
 
-                if(tokenActual.categoria == Categoria.FIN_SENTENCIA)
-                {
+                if (tokenActual.categoria == Categoria.FIN_SENTENCIA) {
                     obtenerSiguienteToken()
                     //El import esta bien escrito
                     return Import(identificador)
@@ -138,42 +135,32 @@ class AnalizadorSintactico(var listaToken:ArrayList<Token>) {
 
             var tipoDato = esTipoDato()
 
-            if(tipoDato!=null)
-            {
-            obtenerSiguienteToken()
-
-            if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
-                var identificador = tokenActual.palabra
-                obtenerSiguienteToken()
-
-                if (tokenActual.categoria == Categoria.OPERADOR_ASIGNACION && tokenActual.palabra == "=") {
+            if (tipoDato != null) {
+                if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
+                    var identificador = tokenActual.palabra
                     obtenerSiguienteToken()
 
-                    var expresion = esExpresion()
-
-                    if (expresion != null) {
-
+                    if (tokenActual.categoria == Categoria.OPERADOR_ASIGNACION && tokenActual.palabra == "=") {
                         obtenerSiguienteToken()
 
-                        if(tokenActual.categoria == Categoria.FIN_SENTENCIA)
-                            {
+                        var expresion = esExpresion()
+                        println("Ex" + expresion)
+
+                        if (expresion != null) {
+                            if (tokenActual.categoria == Categoria.FIN_SENTENCIA) {
                                 obtenerSiguienteToken()
-                              //la declaracion de la variable esta bien escrita
-                            return DeclaracionVariable(tipoDato.palabra,identificador,expresion)
+                                //la declaracion de la variable esta bien escrita
+                                return DeclaracionVariable(tipoDato.palabra, identificador, expresion)
                             }
-                    }
-                    else
-                    {
-                        reportarError("Falta la expresion en la declaración de la variable")
+                        } else {
+                            reportarError("Falta la expresion en la declaración de la variable")
+                        }
+
                     }
 
                 }
 
-                }
-
-            }
-            else
-            {
+            } else {
                 reportarError("Falta el tipo de dato en la declaración de la variable")
             }
         }
@@ -184,13 +171,13 @@ class AnalizadorSintactico(var listaToken:ArrayList<Token>) {
     /**
      * <ListaExpresiones> ::= <Expresion> | <ListaExpresiones>
      */
-    fun esListaExpresion(): ArrayList<Expresion>
-    {
+    fun esListaExpresion(): ArrayList<Expresion> {
         var listaExpresion = ArrayList<Expresion>()
         var expresion = esExpresion()
 
-        while (expresion!=null){
+        while (expresion != null) {
             listaExpresion.add(expresion)
+            expresion = esExpresion()
         }
         return listaExpresion
     }
@@ -198,37 +185,32 @@ class AnalizadorSintactico(var listaToken:ArrayList<Token>) {
     /**
      * <Expresion> ::= [<Relacional>] | [<Logico>] | [<Aritmetico>] | [<ExpresionCadena>]
      */
-    fun esExpresion(): Expresion?
-    {
+    fun esExpresion(): Expresion? {
 
         var relacional = esRelacional()
+        println("RE" + relacional)
 
-        var logico =  esLogico()
+        var logico = esLogico()
+        println("LO" + logico)
 
         var aritmetico = esAritmetico()
+        println("AR" + aritmetico)
 
         var expresionCadena = esExpresionCadena()
+        println("EC" + expresionCadena)
 
-
-        if(relacional!=null)
-        {
+        if (relacional != null) {
             return Expresion(relacional)
-        }
-        else
-            if (logico!=null)
-            {
+        } else
+            if (logico != null) {
                 return Expresion(logico)
-            }
-        else
-            if(aritmetico!=null)
-            {
-                return Expresion(aritmetico)
-            }
-        else
-            if(expresionCadena!=null)
-            {
-                return Expresion(expresionCadena)
-            }
+            } else
+                if (aritmetico != null) {
+                    return Expresion(aritmetico)
+                } else
+                    if (expresionCadena != null) {
+                        return Expresion(expresionCadena)
+                    }
 
         reportarError("No se detectó ninguna expresión")
 
@@ -239,6 +221,7 @@ class AnalizadorSintactico(var listaToken:ArrayList<Token>) {
      *<Relacional>  ::= identificador OperadorRelacional  identificador
      */
     fun esRelacional(): Relacional? {
+        var posicionInicial = posicionActual
         if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
             var identificador1 = tokenActual.palabra
             obtenerSiguienteToken()
@@ -257,14 +240,15 @@ class AnalizadorSintactico(var listaToken:ArrayList<Token>) {
                 }
             }
         }
+        hacerBT(posicionInicial)
         return null
     }
 
     /**
      * <Logico> ::= valor OperadorLogico valor
      */
-    fun esLogico(): Logico?
-    {
+    fun esLogico(): Logico? {
+        var posicionInicial = posicionActual
         if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
             var identificador1 = tokenActual.palabra
             obtenerSiguienteToken()
@@ -283,6 +267,7 @@ class AnalizadorSintactico(var listaToken:ArrayList<Token>) {
                 }
             }
         }
+        hacerBT(posicionInicial)
         return null
     }
 
@@ -290,9 +275,9 @@ class AnalizadorSintactico(var listaToken:ArrayList<Token>) {
     /**
      * <Aritmetico> ::= valor OperadorAritmetico valor
      */
-    fun esAritmetico(): Aritmetico?
-    {
-        if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
+    fun esAritmetico(): Aritmetico? {
+        var posicionInicial = posicionActual
+        if (tokenActual.categoria == Categoria.ENTERO || tokenActual.categoria == Categoria.DECIMAL) {
             var identificador1 = tokenActual.palabra
             obtenerSiguienteToken()
 
@@ -300,7 +285,7 @@ class AnalizadorSintactico(var listaToken:ArrayList<Token>) {
                 var operador = tokenActual.palabra
                 obtenerSiguienteToken()
 
-                if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
+                if (tokenActual.categoria == Categoria.ENTERO || tokenActual.categoria == Categoria.DECIMAL) {
                     var identificador2 = tokenActual.palabra
                     obtenerSiguienteToken()
 
@@ -310,50 +295,47 @@ class AnalizadorSintactico(var listaToken:ArrayList<Token>) {
                 }
             }
         }
+        hacerBT(posicionInicial)
         return null
     }
 
     /**
      * <ExpresionCadena> ::= CadenaCaracteres [+ <Expresion>] | <Expresion> + CadenaCaracteres
      */
-    fun esExpresionCadena(): ExpresionCadena?
-    {
-            if(tokenActual.categoria == Categoria.CADENA_CARACTERES)
-            {
-                var cadena1 = tokenActual.palabra
+    fun esExpresionCadena(): ExpresionCadena? {
+        var posicionInicial = posicionActual
+        if (tokenActual.categoria == Categoria.CADENA_CARACTERES) {
+            var cadena1 = tokenActual.palabra
+
+            obtenerSiguienteToken()
+
+            if (tokenActual.categoria == Categoria.OPERADOR_ARTIMETICO && tokenActual.palabra == "+") {
+
+                var expresion = esExpresion()
 
                 obtenerSiguienteToken()
+                return ExpresionCadena(cadena1, expresion)
 
-                if(tokenActual.categoria == Categoria.OPERADOR_ARTIMETICO && tokenActual.palabra == "+")
-                {
+            }
+        } else {
+            var expresion2 = esExpresion()
 
-                    var expresion = esExpresion()
+            if (expresion2 != null) {
+                obtenerSiguienteToken()
 
-                    obtenerSiguienteToken()
-                    return ExpresionCadena(cadena1, expresion)
+                if (tokenActual.categoria == Categoria.OPERADOR_ARTIMETICO && tokenActual.palabra == "+") {
+                    if (tokenActual.categoria == Categoria.CADENA_CARACTERES) {
+                        var cadena2 = tokenActual.palabra
 
-                }
-            } else
-            {
-                var expresion2 = esExpresion()
+                        obtenerSiguienteToken()
 
-                if(expresion2!=null)
-                {
-                    obtenerSiguienteToken()
-
-                    if(tokenActual.categoria == Categoria.OPERADOR_ARTIMETICO && tokenActual.palabra == "+")
-                    {
-                        if(tokenActual.categoria == Categoria.CADENA_CARACTERES) {
-                            var cadena2 = tokenActual.palabra
-
-                            obtenerSiguienteToken()
-
-                            return ExpresionCadena(cadena2, expresion2)
-                        }
-
+                        return ExpresionCadena(cadena2, expresion2)
                     }
+
                 }
             }
+        }
+        hacerBT(posicionInicial)
         return null
     }
 
@@ -366,8 +348,7 @@ class AnalizadorSintactico(var listaToken:ArrayList<Token>) {
 
             var tipoDato = esTipoDato()
 
-            if(tipoDato!=null)
-            {
+            if (tipoDato != null) {
                 obtenerSiguienteToken()
 
                 if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
@@ -383,15 +364,12 @@ class AnalizadorSintactico(var listaToken:ArrayList<Token>) {
 
                             obtenerSiguienteToken()
 
-                            if(tokenActual.categoria == Categoria.FIN_SENTENCIA)
-                            {
+                            if (tokenActual.categoria == Categoria.FIN_SENTENCIA) {
                                 obtenerSiguienteToken()
                                 //la declaracion de la variable esta bien escrita
-                                return DeclaracionVariableI(tipoDato.palabra,identificador,expresion)
+                                return DeclaracionVariableI(tipoDato.palabra, identificador, expresion)
                             }
-                        }
-                        else
-                        {
+                        } else {
                             reportarError("Falta la expresion en la declaración de la variable inmutable")
                         }
 
@@ -399,9 +377,7 @@ class AnalizadorSintactico(var listaToken:ArrayList<Token>) {
 
                 }
 
-            }
-            else
-            {
+            } else {
                 reportarError("Falta el tipo de dato en la declaración de la variable inmutable")
             }
         }
@@ -409,17 +385,17 @@ class AnalizadorSintactico(var listaToken:ArrayList<Token>) {
         return null
     }
 
-
     /**
      * <ListaFunciones>  ::=  <Funcion> [<ListaFunciones>]
      */
-    fun esListaFunciones(): ArrayList<Funcion>{
+    fun esListaFunciones(): ArrayList<Funcion> {
 
         var listaFunciones = ArrayList<Funcion>()
         var funcion = esFuncion()
 
-        while (funcion!=null){
+        while (funcion != null) {
             listaFunciones.add(funcion)
+            var funcion = esFuncion()
         }
         return listaFunciones
     }
@@ -460,62 +436,48 @@ class AnalizadorSintactico(var listaToken:ArrayList<Token>) {
                                     obtenerSiguienteToken()
                                     //la función esta bien escrita
                                     return Funcion(identificador, listaParametros, tipoRetorno.palabra, listaSentencias)
-                                }
-                                else
-                                {
+                                } else {
                                     reportarError("Falta la lista de sentencias en la función")
                                 }
                             } else {
                                 reportarError("Falta el tipo de retorno en la función")
                             }
-                        }
-                        else
-                        {
+                        } else {
                             reportarError("Faltan los dos puntos antes del tipo de retorno en la función")
                         }
-                    }
-                    else
-                    {
+                    } else {
                         reportarError("La lista de parametros debe cerrar con parentesis derecho")
                     }
-                }
-                else
-                {
+                } else {
                     reportarError("La lista de parametros debe iniciar con parentesis izquierdo")
                 }
 
-            }
-            else
-            {
+            } else {
                 reportarError("La función debe llevar un identificador")
             }
-        }else
-        {
+        } else {
             reportarError("Debe iniciar con la palabra fun")
         }
-            return null
-        }
+        return null
+    }
 
 
     /**
      * <TipoRetorno> ::= int | float | boolean | string | void
      */
     fun esTipoRetorno(): Token? {
-
-            if (tokenActual.categoria == Categoria.PALABRA_RESERVADA) {
-
-
-                if (tokenActual.palabra == "int" || tokenActual.palabra == "float"
-                    || tokenActual.palabra == "boolean" || tokenActual.palabra == "string" || tokenActual.palabra == "void"
-                ) {
-                    obtenerSiguienteToken()
-                    return tokenActual
-                }
-
+        if (tokenActual.categoria == Categoria.PALABRA_RESERVADA) {
+            if (tokenActual.palabra == "int" || tokenActual.palabra == "float"
+                || tokenActual.palabra == "boolean" || tokenActual.palabra == "string" || tokenActual.palabra == "void"
+            ) {
+                val tipoRetorno = tokenActual
+                obtenerSiguienteToken()
+                return tipoRetorno
             }
-            return null
-        }
 
+        }
+        return null
+    }
 
     /**
      * <TipoDato> ::= int | boolean | string | float
@@ -524,18 +486,17 @@ class AnalizadorSintactico(var listaToken:ArrayList<Token>) {
 
         if (tokenActual.categoria == Categoria.PALABRA_RESERVADA) {
 
-
             if (tokenActual.palabra == "int" || tokenActual.palabra == "float"
-                || tokenActual.palabra == "boolean" || tokenActual.palabra == "string")
-            {
+                || tokenActual.palabra == "boolean" || tokenActual.palabra == "string"
+            ) {
+                val tipoDato = tokenActual
                 obtenerSiguienteToken()
-                return tokenActual
+                return tipoDato
             }
 
         }
         return null
     }
-
 
     /**
      * <ListaParametros> ::= <Parámetro> [“,”<ListaParametros>]
@@ -781,11 +742,11 @@ class AnalizadorSintactico(var listaToken:ArrayList<Token>) {
     /**
      * <Ciclo> ::= while “(” <ExpresionLogica> “)” “{” <ListaSentencias> “}”
      */
-    fun esCiclo():Ciclo? {
+    fun esCiclo(): Ciclo? {
         if (tokenActual.categoria == Categoria.PALABRA_RESERVADA && tokenActual.palabra == "while") {
             obtenerSiguienteToken()
             if (tokenActual.categoria == Categoria.PARENTESIS_IZQUIERDO) {
-                val expresion = esLogico()
+                var expresion = esLogico()
                 if (expresion != null) {
                     if (tokenActual.categoria == Categoria.PARENTESIS_DERECHO) {
                         obtenerSiguienteToken()
