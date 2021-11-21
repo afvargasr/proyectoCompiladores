@@ -61,10 +61,8 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
         var listaImports = esListaImports()
 
         var declaracionVariable = esDeclaracionVariable()
-        println("DV" + declaracionVariable)
 
         if (declaracionVariable != null) {
-            obtenerSiguienteToken()
 
             var listaFuncion = esListaFunciones()
 
@@ -96,7 +94,6 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
             import = esImport()
         }
         return listaImports
-
     }
 
     /**
@@ -115,16 +112,16 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
                     obtenerSiguienteToken()
                     //El import esta bien escrito
                     return Import(identificador)
+                } else {
+                    reportarError("No se encuentra el fin de sentencia")
                 }
-
-
+            } else {
+                reportarError("No se encuentra el identificador")
             }
-
         }
 
         return null
     }
-
 
     /**
      * <DeclaracionVariableMutable> ::= var <tipoDato> identificador " = " <Expresion>”;”
@@ -144,20 +141,24 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
                         obtenerSiguienteToken()
 
                         var expresion = esExpresion()
-                        println("Ex" + expresion)
 
                         if (expresion != null) {
                             if (tokenActual.categoria == Categoria.FIN_SENTENCIA) {
                                 obtenerSiguienteToken()
                                 //la declaracion de la variable esta bien escrita
                                 return DeclaracionVariable(tipoDato.palabra, identificador, expresion)
+                            } else {
+                                reportarError("Falta el fin de sentencia")
                             }
                         } else {
                             reportarError("Falta la expresion en la declaración de la variable")
                         }
-
+                    } else {
+                        reportarError("Falta el operador '='")
                     }
 
+                } else {
+                    reportarError("No se encuentra el identificador")
                 }
 
             } else {
@@ -188,16 +189,12 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
     fun esExpresion(): Expresion? {
 
         var relacional = esRelacional()
-        println("RE" + relacional)
 
         var logico = esLogico()
-        println("LO" + logico)
 
         var aritmetico = esAritmetico()
-        println("AR" + aritmetico)
 
         var expresionCadena = esExpresionCadena()
-        println("EC" + expresionCadena)
 
         if (relacional != null) {
             return Expresion(relacional)
@@ -236,8 +233,11 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
 
                     //La expresión relacional esta bien escrita
                     return Relacional(identificador1, operador, identificador2)
-
+                } else {
+                    reportarError("No se encuentra el segundo identificador")
                 }
+            } else {
+                reportarError("No se encuentra el operador relacional")
             }
         }
         hacerBT(posicionInicial)
@@ -263,14 +263,16 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
 
                     //La expresión relacional esta bien escrita
                     return Logico(identificador1, operador, identificador2)
-
+                } else {
+                    reportarError("No se encuentra es el segundo identificador")
                 }
+            } else {
+                reportarError("No se encuentra el operador logico")
             }
         }
         hacerBT(posicionInicial)
         return null
     }
-
 
     /**
      * <Aritmetico> ::= valor OperadorAritmetico valor
@@ -291,8 +293,11 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
 
                     //La expresión relacional esta bien escrita
                     return Aritmetico(identificador1, operador, identificador2)
-
+                } else {
+                    reportarError("No se encuentra el segundo valor")
                 }
+            } else {
+                reportarError("No se encuentra el operador")
             }
         }
         hacerBT(posicionInicial)
@@ -300,7 +305,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
     }
 
     /**
-     * <ExpresionCadena> ::= CadenaCaracteres [+ <Expresion>] | <Expresion> + CadenaCaracteres
+     * <ExpresionCadena> ::= CadenaCaracteres [+ <Expresion>]
      */
     fun esExpresionCadena(): ExpresionCadena? {
         var posicionInicial = posicionActual
@@ -313,26 +318,10 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
 
                 var expresion = esExpresion()
 
-                obtenerSiguienteToken()
                 return ExpresionCadena(cadena1, expresion)
 
-            }
-        } else {
-            var expresion2 = esExpresion()
-
-            if (expresion2 != null) {
-                obtenerSiguienteToken()
-
-                if (tokenActual.categoria == Categoria.OPERADOR_ARTIMETICO && tokenActual.palabra == "+") {
-                    if (tokenActual.categoria == Categoria.CADENA_CARACTERES) {
-                        var cadena2 = tokenActual.palabra
-
-                        obtenerSiguienteToken()
-
-                        return ExpresionCadena(cadena2, expresion2)
-                    }
-
-                }
+            } else {
+                reportarError("No se encontro el operador '+'")
             }
         }
         hacerBT(posicionInicial)
@@ -349,7 +338,6 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
             var tipoDato = esTipoDato()
 
             if (tipoDato != null) {
-                obtenerSiguienteToken()
 
                 if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
                     var identificador = tokenActual.palabra
@@ -361,13 +349,11 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
                         var expresion = esExpresion()
 
                         if (expresion != null) {
-
-                            obtenerSiguienteToken()
-
                             if (tokenActual.categoria == Categoria.FIN_SENTENCIA) {
-                                obtenerSiguienteToken()
                                 //la declaracion de la variable esta bien escrita
                                 return DeclaracionVariableI(tipoDato.palabra, identificador, expresion)
+                            } else {
+                                reportarError("Falta el fin de sentencia")
                             }
                         } else {
                             reportarError("Falta la expresion en la declaración de la variable inmutable")
@@ -381,7 +367,6 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
                 reportarError("Falta el tipo de dato en la declaración de la variable inmutable")
             }
         }
-
         return null
     }
 
@@ -395,7 +380,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
 
         while (funcion != null) {
             listaFunciones.add(funcion)
-            var funcion = esFuncion()
+            funcion = esFuncion()
         }
         return listaFunciones
     }
@@ -405,7 +390,6 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
      * :<TipoRetorno> “{“ <ListaSentencias> “}”
      */
     fun esFuncion(): Funcion? {
-
         if (tokenActual.categoria == Categoria.PALABRA_RESERVADA && tokenActual.palabra == "fun") {
             obtenerSiguienteToken()
 
@@ -461,20 +445,17 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
         return null
     }
 
-
     /**
      * <TipoRetorno> ::= int | float | boolean | string | void
      */
     fun esTipoRetorno(): Token? {
         if (tokenActual.categoria == Categoria.PALABRA_RESERVADA) {
             if (tokenActual.palabra == "int" || tokenActual.palabra == "float"
-                || tokenActual.palabra == "boolean" || tokenActual.palabra == "string" || tokenActual.palabra == "void"
-            ) {
+                || tokenActual.palabra == "boolean" || tokenActual.palabra == "string" || tokenActual.palabra == "void") {
                 val tipoRetorno = tokenActual
                 obtenerSiguienteToken()
                 return tipoRetorno
             }
-
         }
         return null
     }
@@ -487,8 +468,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
         if (tokenActual.categoria == Categoria.PALABRA_RESERVADA) {
 
             if (tokenActual.palabra == "int" || tokenActual.palabra == "float"
-                || tokenActual.palabra == "boolean" || tokenActual.palabra == "string"
-            ) {
+                || tokenActual.palabra == "boolean" || tokenActual.palabra == "string") {
                 val tipoDato = tokenActual
                 obtenerSiguienteToken()
                 return tipoDato
@@ -523,6 +503,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
      * <Parámetro> ::= <TipoDato> identificador
      */
     fun esParametro(): Parametro? {
+        var posicionInicial = posicionActual
         val tipoDato = esTipoDato()
         if (tipoDato != null) {
             obtenerSiguienteToken()
@@ -532,9 +513,8 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
             } else {
                 reportarError("El nombre del parametro esta incorrecto")
             }
-        } else {
-            reportarError("El tipo de dato es incorrecto")
         }
+        hacerBT(posicionInicial)
         return null
     }
 
@@ -555,8 +535,6 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
             } else {
                 reportarError("El nombre del identificador esta incorrecto")
             }
-        } else {
-            reportarError("No se encuentra la palabra reservada 'return'")
         }
 
         return null
@@ -680,8 +658,6 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
             } else {
                 reportarError("No se encuentra el parentesis izquierdo")
             }
-        } else {
-            reportarError("No se encuentra la palabra 'if'")
         }
         return null
     }
@@ -690,6 +666,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
      * <Asignacion>  ::= identificador operadorAsignacion <Expresion>”;”
      */
     fun esAsignacion(): Asignacion? {
+        var posicionInicial = posicionActual
         if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
             val identificador = tokenActual
             obtenerSiguienteToken()
@@ -710,9 +687,8 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
             } else {
                 reportarError("No se encuentra el operador de asignacion")
             }
-        } else {
-            reportarError("No se encuentra el identificador")
         }
+        hacerBT(posicionInicial)
         return null
     }
 
@@ -733,8 +709,6 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
             } else {
                 reportarError("No se encuentra la cadena de caracteres")
             }
-        } else {
-            reportarError("No se encuentra la palabra 'print'")
         }
         return null
     }
@@ -774,8 +748,6 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
             } else {
                 reportarError("No se encuentra el parentesis izquierdo")
             }
-        } else {
-            reportarError("No se encuentra la palabra 'while'")
         }
         return null
     }
@@ -784,6 +756,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
      * <DeclaracionArreglos> ::= <TipoDato> identificador ”;”
      */
     fun esDeclaracionArreglos(): DeclaracionArreglo? {
+        var posicionInicial = posicionActual
         val tipoDato = esTipoDato()
         if (tipoDato != null) {
             if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
@@ -798,9 +771,8 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
             } else {
                 reportarError("No se encuentra el identificador")
             }
-        } else {
-            reportarError("No se encuentra el tipo de dato")
         }
+        hacerBT(posicionInicial)
         return null
     }
 
@@ -808,6 +780,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
      * <InicializacionArreglos> ::= <TipoDato> identificador “=” “{” <ListaValores> “}””;”
      */
     fun esInicializacionArreglos(): InicializacionArreglo? {
+        var posicionInicial = posicionActual
         val tipoDato = esTipoDato()
         if (tipoDato != null) {
             if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
@@ -842,9 +815,8 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
             } else {
                 reportarError("No se encuentra el identificador")
             }
-        } else {
-            reportarError("No se encuentra el tipo de dato")
         }
+        hacerBT(posicionInicial)
         return null
     }
 
@@ -875,6 +847,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
      * <LecturaDatos> ::= identificador “=” valor”;”
      */
     fun esLecturaDatos(): LecturaDatos? {
+        var posicionInicial = posicionActual
         if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
             val identificador = tokenActual
             obtenerSiguienteToken()
@@ -895,9 +868,8 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
             } else {
                 reportarError("No se encuentra el operador '='")
             }
-        } else {
-            reportarError("No se encuentra el identificador")
         }
+        hacerBT(posicionInicial)
         return null
     }
 
@@ -905,6 +877,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
      * <InvocacionFuncion> ::= identificador “(“ [<ListaArgumentos>] “)””;”
      */
     fun esInvocacionFuncion(): Invocacion? {
+        var posicionInicial = posicionActual
         if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
             val identificador = tokenActual.palabra
             obtenerSiguienteToken()
@@ -925,9 +898,8 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
             } else {
                 reportarError("No se encuentra el parentesis izquierdo")
             }
-        } else {
-            reportarError("No se encuentra el identificador")
         }
+        hacerBT(posicionInicial)
         return null
     }
 
@@ -935,6 +907,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
      * <ListaArgumentos> ::= <Argumento> [“,” <ListaArgumentos>]
      */
     fun esListaArgumentos(): ArrayList<Argumento> {
+        var posicionInicial = posicionActual
         var listaArgumentos = ArrayList<Argumento>()
         var argumento = esArgumento()
         while (argumento != null) {
@@ -949,6 +922,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
                 break
             }
         }
+        hacerBT(posicionInicial)
         return listaArgumentos
     }
 
@@ -968,6 +942,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
      * <Incremento> ::= identificador “++””;”
      */
     fun esIncremento(): Incremento? {
+        var posicionInicial = posicionActual
         if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
             val identificador = tokenActual
             obtenerSiguienteToken()
@@ -982,9 +957,8 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
             } else {
                 reportarError("No se encuentra el operador '++'")
             }
-        } else {
-            reportarError("No se encuentra el identificador")
         }
+        hacerBT(posicionInicial)
         return null
     }
 
@@ -992,6 +966,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
      * <Decremento> ::= identificador “--””;”
      */
     fun esDecremento(): Decremento? {
+        var posicionInicial = posicionActual
         if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
             val identificador = tokenActual
             obtenerSiguienteToken()
@@ -1006,9 +981,8 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
             } else {
                 reportarError("No se encuentra el operador '--'")
             }
-        } else {
-            reportarError("No se encuentra el identificador")
         }
+        hacerBT(posicionInicial)
         return null
     }
 }
