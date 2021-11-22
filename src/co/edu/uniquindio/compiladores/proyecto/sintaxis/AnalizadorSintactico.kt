@@ -1,8 +1,8 @@
 package co.edu.uniquindio.compiladores.proyecto.sintaxis
 
 import co.edu.uniquindio.compiladores.proyecto.lexico.Categoria
-import co.edu.uniquindio.compiladores.proyecto.lexico.Token
 import co.edu.uniquindio.compiladores.proyecto.lexico.Error
+import co.edu.uniquindio.compiladores.proyecto.lexico.Token
 
 class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
 
@@ -321,7 +321,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
                 return ExpresionCadena(cadena1, expresion)
 
             } else {
-                reportarError("No se encontro el operador '+'")
+                return ExpresionCadena(cadena1, null)
             }
         }
         hacerBT(posicionInicial)
@@ -418,8 +418,17 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
                                 if (listaSentencias != null) {
 
                                     obtenerSiguienteToken()
+
+                                    var retorno = esRetorno()
+
                                     //la función esta bien escrita
-                                    return Funcion(identificador, listaParametros, tipoRetorno.palabra, listaSentencias)
+                                    return Funcion(
+                                        identificador,
+                                        listaParametros,
+                                        tipoRetorno.palabra,
+                                        listaSentencias,
+                                        retorno
+                                    )
                                 } else {
                                     reportarError("Falta la lista de sentencias en la función")
                                 }
@@ -451,7 +460,8 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
     fun esTipoRetorno(): Token? {
         if (tokenActual.categoria == Categoria.PALABRA_RESERVADA) {
             if (tokenActual.palabra == "int" || tokenActual.palabra == "float"
-                || tokenActual.palabra == "boolean" || tokenActual.palabra == "string" || tokenActual.palabra == "void") {
+                || tokenActual.palabra == "boolean" || tokenActual.palabra == "string" || tokenActual.palabra == "void"
+            ) {
                 val tipoRetorno = tokenActual
                 obtenerSiguienteToken()
                 return tipoRetorno
@@ -468,7 +478,8 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
         if (tokenActual.categoria == Categoria.PALABRA_RESERVADA) {
 
             if (tokenActual.palabra == "int" || tokenActual.palabra == "float"
-                || tokenActual.palabra == "boolean" || tokenActual.palabra == "string") {
+                || tokenActual.palabra == "boolean" || tokenActual.palabra == "string"
+            ) {
                 val tipoDato = tokenActual
                 obtenerSiguienteToken()
                 return tipoDato
@@ -481,7 +492,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
     /**
      * <ListaParametros> ::= <Parámetro> [“,”<ListaParametros>]
      */
-    fun esListaParametros(): ArrayList<Parametro>? {
+    fun esListaParametros(): ArrayList<Parametro> {
         var listaParametros = ArrayList<Parametro>()
         var parametro = esParametro()
         while (parametro != null) {
@@ -491,7 +502,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
                 parametro = esParametro()
             } else {
                 if (tokenActual.categoria != Categoria.PARENTESIS_DERECHO) {
-                    reportarError("Falta una coma en la lista de paramentros")
+                    reportarError("Falta una coma en la lista de parámetros")
                 }
                 break
             }
@@ -506,10 +517,10 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
         var posicionInicial = posicionActual
         val tipoDato = esTipoDato()
         if (tipoDato != null) {
-            obtenerSiguienteToken()
             if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
+                var identificador = tokenActual
                 obtenerSiguienteToken()
-                return Parametro(tipoDato, tokenActual)
+                return Parametro(tipoDato, identificador)
             } else {
                 reportarError("El nombre del parametro esta incorrecto")
             }
@@ -608,8 +619,8 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
         if (tokenActual.categoria == Categoria.PALABRA_RESERVADA && tokenActual.palabra == "if") {
             obtenerSiguienteToken()
             if (tokenActual.categoria == Categoria.PARENTESIS_IZQUIERDO) {
-                val expresiones = esListaExpresion()
-                obtenerSiguienteToken()
+                var expresiones = esExpresion()
+                println("Expresiones " + expresiones)
                 if (expresiones != null) {
                     if (tokenActual.categoria == Categoria.PARENTESIS_DERECHO) {
                         obtenerSiguienteToken()
@@ -638,6 +649,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
                                             reportarError("No se encuentra la llave izquierda")
                                         }
                                     } else {
+                                        print("Algo ")
                                         return Decision(expresiones, sentenciasIf, ArrayList())
                                     }
                                 } else {

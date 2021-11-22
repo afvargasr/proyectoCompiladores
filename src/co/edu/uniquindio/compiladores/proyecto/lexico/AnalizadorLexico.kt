@@ -15,7 +15,7 @@ class AnalizadorLexico(var codigoFuente: String) {
     var listaTokens = ArrayList<Token>()
     var finCodigo = 0.toChar()
     var palabrasReservadas = listOf<String>(
-        "int", "void", "float", "var", "fun", "final", "for", "while", "String", "if", "boolean",
+        "int", "void", "float", "var", "fun", "final", "for", "while", "string", "if", "boolean",
         "cons", "import", "return", "else", "print"
     )
 

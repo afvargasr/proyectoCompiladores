@@ -41,18 +41,15 @@ class InicioController: Initializable {
             lexico.analizar()
             tblTokens.items = FXCollections.observableArrayList(lexico.listaTokens)
 
-            if (lexico.listaTokens.isEmpty()) {
+            val sintaxis = AnalizadorSintactico(lexico.listaTokens)
+            val uc = sintaxis.esUnidadDeCompilacion()
 
-                val sintaxis = AnalizadorSintactico(lexico.listaTokens)
-                val uc = sintaxis.esUnidadDeCompilacion()
-
-                if (uc != null) {
-                    arbolVisual.root = uc.getArbolVisual()
-                }else{
-                    var alerta = Alert(Alert.AlertType.WARNING)
-                    alerta.headerText = "Mensaje de Error"
-                    alerta.contentText = "Hay errores léxicos"
-                }
+            if (uc != null) {
+                arbolVisual.root = uc.getArbolVisual()
+            } else {
+                var alerta = Alert(Alert.AlertType.WARNING)
+                alerta.headerText = "Mensaje de Error"
+                alerta.contentText = "Hay errores léxicos"
             }
         }
     }

@@ -1,7 +1,7 @@
 package co.edu.uniquindio.compiladores.proyecto.sintaxis
 
 class Decision(
-    var expresiones: ArrayList<Expresion>,
+    var expresiones: Expresion,
     var sentenciasIf: ArrayList<Sentencia>,
     var setenciasElse: ArrayList<Sentencia>
 ) {
