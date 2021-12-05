@@ -47,13 +47,13 @@ class AnalizadorLexico(var codigoFuente: String) {
             if (esDecimal()) continue
             if (esReservada()) continue
             if (esIdentificador()) continue
-            if (esOperadorLogico()) continue
             if (esParentesisIzquierdo()) continue
             if (esParentesisDerecho()) continue
             if (esCorcheteIzquierdo()) continue
             if (esCorcheteDerecho()) continue
             if (esLlaveIzquierda()) continue
             if (esLlaveDerecha()) continue
+            if (esOperadorLogico()) continue
             if (esOperadorRelacional()) continue
             if (esAsignacion()) continue
             if (esIncrementoODecremento()) continue
@@ -203,7 +203,6 @@ class AnalizadorLexico(var codigoFuente: String) {
             }
 
             almacenarToken(palabra, Categoria.DECIMAL, fila, columna)
-            obtenerSgteCaracter()
             return true
 
         }
@@ -405,6 +404,8 @@ class AnalizadorLexico(var codigoFuente: String) {
                     //RE
                     throw ReporteErrorException("No se encontró el cierre del carácter")
                 }
+            } else {
+                throw ReporteErrorException("No se encontró el carácter")
             }
         }
 

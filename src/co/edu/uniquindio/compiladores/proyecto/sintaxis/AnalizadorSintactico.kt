@@ -60,22 +60,17 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
 
         var listaImports = esListaImports()
 
-        var declaracionVariable = esDeclaracionVariable()
+        var listaDeclaracionVariable = esListaDeclaracionVariable()
 
-        if (declaracionVariable != null) {
+        var listaDeclaracionVariableI = esListaDeclaracionVariableI()
 
-            var listaFuncion = esListaFunciones()
+        var listaFuncion = esListaFunciones()
 
-            if (listaFuncion != null) {
-                obtenerSiguienteToken()
-                // el elemento esta bien escrito
-                return Elemento(listaImports, declaracionVariable, listaFuncion)
-            } else {
-                reportarError("Falta las funciones en el elemento")
-            }
-
+        if (listaFuncion != null) {
+            // el elemento esta bien escrito
+            return Elemento(listaImports, listaDeclaracionVariable, listaDeclaracionVariableI, listaFuncion)
         } else {
-            reportarError("Falta la declaración de variable en el elemento")
+            reportarError("Falta las funciones en el elemento")
         }
 
         return null
@@ -121,6 +116,21 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
         }
 
         return null
+    }
+
+    /**
+     * <ListaDeclaracionVariable> ::= <DeclaracionVariable>[<ListaDeclaracionVariable>]
+     */
+    fun esListaDeclaracionVariable(): ArrayList<DeclaracionVariable> {
+
+        var listaDeclaracionVariable = ArrayList<DeclaracionVariable>()
+        var declaracionVariable = esDeclaracionVariable()
+
+        while (declaracionVariable != null) {
+            listaDeclaracionVariable.add(declaracionVariable)
+            declaracionVariable = esDeclaracionVariable()
+        }
+        return listaDeclaracionVariable
     }
 
     /**
@@ -187,30 +197,27 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
      * <Expresion> ::= [<Relacional>] | [<Logico>] | [<Aritmetico>] | [<ExpresionCadena>]
      */
     fun esExpresion(): Expresion? {
-
         var relacional = esRelacional()
-
-        var logico = esLogico()
-
-        var aritmetico = esAritmetico()
-
-        var expresionCadena = esExpresionCadena()
-
         if (relacional != null) {
             return Expresion(relacional)
-        } else
-            if (logico != null) {
-                return Expresion(logico)
-            } else
-                if (aritmetico != null) {
-                    return Expresion(aritmetico)
-                } else
-                    if (expresionCadena != null) {
-                        return Expresion(expresionCadena)
-                    }
+        }
+
+        var logico = esLogico()
+        if (logico != null) {
+            return Expresion(logico)
+        }
+
+        var aritmetico = esAritmetico()
+        if (aritmetico != null) {
+            return Expresion(aritmetico)
+        }
+
+        var expresionCadena = esExpresionCadena()
+        if (expresionCadena != null) {
+            return Expresion(expresionCadena)
+        }
 
         reportarError("No se detectó ninguna expresión")
-
         return null
     }
 
@@ -219,7 +226,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
      */
     fun esRelacional(): Relacional? {
         var posicionInicial = posicionActual
-        if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
+        if (tokenActual.categoria == Categoria.IDENTIFICADOR || tokenActual.categoria == Categoria.ENTERO || tokenActual.categoria == Categoria.DECIMAL) {
             var identificador1 = tokenActual.palabra
             obtenerSiguienteToken()
 
@@ -227,7 +234,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
                 var operador = tokenActual.palabra
                 obtenerSiguienteToken()
 
-                if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
+                if (tokenActual.categoria == Categoria.IDENTIFICADOR || tokenActual.categoria == Categoria.ENTERO || tokenActual.categoria == Categoria.DECIMAL) {
                     var identificador2 = tokenActual.palabra
                     obtenerSiguienteToken()
 
@@ -249,7 +256,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
      */
     fun esLogico(): Logico? {
         var posicionInicial = posicionActual
-        if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
+        if (tokenActual.categoria == Categoria.IDENTIFICADOR || tokenActual.categoria == Categoria.ENTERO || tokenActual.categoria == Categoria.DECIMAL) {
             var identificador1 = tokenActual.palabra
             obtenerSiguienteToken()
 
@@ -257,7 +264,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
                 var operador = tokenActual.palabra
                 obtenerSiguienteToken()
 
-                if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
+                if (tokenActual.categoria == Categoria.IDENTIFICADOR || tokenActual.categoria == Categoria.ENTERO || tokenActual.categoria == Categoria.DECIMAL) {
                     var identificador2 = tokenActual.palabra
                     obtenerSiguienteToken()
 
@@ -329,6 +336,21 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
     }
 
     /**
+     * <ListaDeclaracionVariableI> ::= <DeclaracionVariableI>[<ListaDeclaracionVariableI>]
+     */
+    fun esListaDeclaracionVariableI(): ArrayList<DeclaracionVariableI> {
+
+        var listaDeclaracionVariableI = ArrayList<DeclaracionVariableI>()
+        var declaracionVariableI = esDeclaracionVariableI()
+
+        while (declaracionVariableI != null) {
+            listaDeclaracionVariableI.add(declaracionVariableI)
+            declaracionVariableI = esDeclaracionVariableI()
+        }
+        return listaDeclaracionVariableI
+    }
+
+    /**
      * <DeclaracionVariableInmutable> ::= cons <tipoDato> identificador " = " <Expresion>”;”
      */
     fun esDeclaracionVariableI(): DeclaracionVariableI? {
@@ -350,6 +372,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
 
                         if (expresion != null) {
                             if (tokenActual.categoria == Categoria.FIN_SENTENCIA) {
+                                obtenerSiguienteToken()
                                 //la declaracion de la variable esta bien escrita
                                 return DeclaracionVariableI(tipoDato.palabra, identificador, expresion)
                             } else {
@@ -411,13 +434,10 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
                             var tipoRetorno = esTipoRetorno()
 
                             if (tipoRetorno != null) {
-                                obtenerSiguienteToken()
 
                                 var listaSentencias = esListaSentencias()
 
                                 if (listaSentencias != null) {
-
-                                    obtenerSiguienteToken()
 
                                     var retorno = esRetorno()
 
@@ -539,6 +559,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
                 var identificador = tokenActual.palabra
                 obtenerSiguienteToken()
                 if (tokenActual.categoria == Categoria.FIN_SENTENCIA) {
+                    obtenerSiguienteToken()
                     return Retorno(identificador)
                 } else {
                     reportarError("No se encuentra el fin de la sentencia")
@@ -568,46 +589,99 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
      * <Sentencia> ::= <Decision> | <DeclaracionVariableMutable> | <DeclaracionVariableInmutable> | <Asignacion> | <ImpresionDatos> | <Ciclo> | <DeclaracionArreglos> | <InicializacionArreglos> | <Retorno> | <LecturaDatos> | <InvocacionFuncion> | <Incremento> | <Decremento>
      */
     fun esSentencia(): Sentencia? {
+        var posicionInicial = posicionActual
+
         val decision = esDecision()
-        val declaracionVariableMutable = esDeclaracionVariable()
-        val declaracionVariableInmutable = esDeclaracionVariableI()
-        val asignacion = esAsignacion()
-        val impresionDatos = esImpresionDatos()
-        val ciclo = esCiclo()
-        val declaracionArreglos = esDeclaracionArreglos()
-        val inicializacionArreglos = esInicializacionArreglos()
-        val retorno = esRetorno()
-        val lecturaDatos = esLecturaDatos()
-        val invocacionFuncion = esInvocacionFuncion()
-        val incremento = esIncremento()
-        val decremento = esDecremento()
         if (decision != null) {
             return Sentencia(decision)
-        } else if (declaracionVariableMutable != null) {
-            return Sentencia(declaracionVariableMutable)
-        } else if (declaracionVariableInmutable != null) {
-            return Sentencia(declaracionVariableInmutable)
-        } else if (asignacion != null) {
-            return Sentencia(asignacion)
-        } else if (impresionDatos != null) {
-            return Sentencia(impresionDatos)
-        } else if (ciclo != null) {
-            return Sentencia(ciclo)
-        } else if (declaracionArreglos != null) {
-            return Sentencia(declaracionArreglos)
-        } else if (inicializacionArreglos != null) {
-            return Sentencia(inicializacionArreglos)
-        } else if (retorno != null) {
-            return Sentencia(retorno)
-        } else if (lecturaDatos != null) {
-            return Sentencia(lecturaDatos)
-        } else if (invocacionFuncion != null) {
-            return Sentencia(invocacionFuncion)
-        } else if (incremento != null) {
-            return Sentencia(incremento)
-        } else if (decremento != null) {
-            return Sentencia(decremento)
+        } else {
+            hacerBT(posicionInicial)
         }
+
+        val declaracionVariableMutable = esDeclaracionVariable()
+        if (declaracionVariableMutable != null) {
+            return Sentencia(declaracionVariableMutable)
+        } else {
+            hacerBT(posicionInicial)
+        }
+
+        val declaracionVariableInmutable = esDeclaracionVariableI()
+        if (declaracionVariableInmutable != null) {
+            return Sentencia(declaracionVariableInmutable)
+        } else {
+            hacerBT(posicionInicial)
+        }
+
+        val asignacion = esAsignacion()
+        if (asignacion != null) {
+            return Sentencia(asignacion)
+        } else {
+            hacerBT(posicionInicial)
+        }
+
+        val impresionDatos = esImpresionDatos()
+        if (impresionDatos != null) {
+            return Sentencia(impresionDatos)
+        } else {
+            hacerBT(posicionInicial)
+        }
+
+        val ciclo = esCiclo()
+        if (ciclo != null) {
+            return Sentencia(ciclo)
+        } else {
+            hacerBT(posicionInicial)
+        }
+
+        val declaracionArreglos = esDeclaracionArreglos()
+        if (declaracionArreglos != null) {
+            return Sentencia(declaracionArreglos)
+        } else {
+            hacerBT(posicionInicial)
+        }
+
+        val inicializacionArreglos = esInicializacionArreglos()
+        if (inicializacionArreglos != null) {
+            return Sentencia(inicializacionArreglos)
+        } else {
+            hacerBT(posicionInicial)
+        }
+
+        val retorno = esRetorno()
+        if (retorno != null) {
+            return Sentencia(retorno)
+        } else {
+            hacerBT(posicionInicial)
+        }
+
+        val lecturaDatos = esLecturaDatos()
+        if (lecturaDatos != null) {
+            return Sentencia(lecturaDatos)
+        } else {
+            hacerBT(posicionInicial)
+        }
+
+        val invocacionFuncion = esInvocacionFuncion()
+        if (invocacionFuncion != null) {
+            return Sentencia(invocacionFuncion)
+        } else {
+            hacerBT(posicionInicial)
+        }
+
+        val incremento = esIncremento()
+        if (incremento != null) {
+            return Sentencia(incremento)
+        } else {
+            hacerBT(posicionInicial)
+        }
+
+        val decremento = esDecremento()
+        if (decremento != null) {
+            return Sentencia(decremento)
+        } else {
+            hacerBT(posicionInicial)
+        }
+
         reportarError("No se encuentra nunguna sentencia")
         return null
     }
@@ -620,7 +694,6 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
             obtenerSiguienteToken()
             if (tokenActual.categoria == Categoria.PARENTESIS_IZQUIERDO) {
                 var expresiones = esExpresion()
-                println("Expresiones " + expresiones)
                 if (expresiones != null) {
                     if (tokenActual.categoria == Categoria.PARENTESIS_DERECHO) {
                         obtenerSiguienteToken()
@@ -649,7 +722,6 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
                                             reportarError("No se encuentra la llave izquierda")
                                         }
                                     } else {
-                                        print("Algo ")
                                         return Decision(expresiones, sentenciasIf, ArrayList())
                                     }
                                 } else {

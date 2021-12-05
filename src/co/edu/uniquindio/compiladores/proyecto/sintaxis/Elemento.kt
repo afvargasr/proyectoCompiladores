@@ -2,10 +2,10 @@ package co.edu.uniquindio.compiladores.proyecto.sintaxis
 
 import javafx.scene.control.TreeItem
 
-class Elemento(var listaImports: ArrayList<Import>, var declaracionVariable: DeclaracionVariable , var listaFuncion: ArrayList<Funcion>)
+class Elemento(var listaImports: ArrayList<Import>, var listaDeclaracionVariable: ArrayList<DeclaracionVariable>, var listaDeclaracionVariableI: ArrayList<DeclaracionVariableI>, var listaFuncion: ArrayList<Funcion>)
 {
     override fun toString(): String {
-        return "Elemento(listaImports=$listaImports, declaracionVariable=$declaracionVariable, listaFuncion=$listaFuncion)"
+        return "Elemento(listaImports=$listaImports, listaDeclaracionVariable=$listaDeclaracionVariable, listaDeclaracionVariableI=$listaDeclaracionVariableI, listaFuncion=$listaFuncion)"
     }
 
     fun getArbolVisual(): TreeItem<String> {
@@ -16,11 +16,13 @@ class Elemento(var listaImports: ArrayList<Import>, var declaracionVariable: Dec
             raiz.children.add(f.getArbolVisual())
         }
 
-        raiz.children.add(TreeItem("Declaracion de Variable"))
+        for (f in listaDeclaracionVariable){
+            raiz.children.add(f.getArbolVisual())
+        }
 
-        raiz.children.add(TreeItem("${declaracionVariable.tipoDato}"))
-        raiz.children.add(TreeItem("${declaracionVariable.identificador}"))
-        raiz.children.add(TreeItem("${declaracionVariable.expresion}"))
+        for (f in listaDeclaracionVariableI){
+            raiz.children.add(f.getArbolVisual())
+        }
 
         for (f in listaFuncion){
             raiz.children.add(f.getArbolVisual())
