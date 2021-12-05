@@ -66,7 +66,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
 
         var listaFuncion = esListaFunciones()
 
-        if (listaFuncion != null) {
+        if (listaFuncion.size > 0) {
             // el elemento esta bien escrito
             return Elemento(listaImports, listaDeclaracionVariable, listaDeclaracionVariableI, listaFuncion)
         } else {
@@ -315,7 +315,6 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
      * <ExpresionCadena> ::= CadenaCaracteres [+ <Expresion>]
      */
     fun esExpresionCadena(): ExpresionCadena? {
-        var posicionInicial = posicionActual
         if (tokenActual.categoria == Categoria.CADENA_CARACTERES) {
             var cadena1 = tokenActual.palabra
 
@@ -331,7 +330,6 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
                 return ExpresionCadena(cadena1, null)
             }
         }
-        hacerBT(posicionInicial)
         return null
     }
 
@@ -434,23 +432,33 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
                             var tipoRetorno = esTipoRetorno()
 
                             if (tipoRetorno != null) {
+                                if (tokenActual.categoria == Categoria.LLAVE_IZQUIERDA) {
+                                    obtenerSiguienteToken()
 
-                                var listaSentencias = esListaSentencias()
+                                    var listaSentencias = esListaSentencias()
 
-                                if (listaSentencias != null) {
+                                    if (listaSentencias.size > 0) {
 
-                                    var retorno = esRetorno()
+                                        var retorno = esRetorno()
 
-                                    //la función esta bien escrita
-                                    return Funcion(
-                                        identificador,
-                                        listaParametros,
-                                        tipoRetorno.palabra,
-                                        listaSentencias,
-                                        retorno
-                                    )
+                                        if (tokenActual.categoria == Categoria.LLAVE_DERECHA) {
+                                            obtenerSiguienteToken()
+                                            //la función esta bien escrita
+                                            return Funcion(
+                                                identificador,
+                                                listaParametros,
+                                                tipoRetorno.palabra,
+                                                listaSentencias,
+                                                retorno
+                                            )
+                                        } else {
+                                            reportarError("Falta la llave derecha")
+                                        }
+                                    } else {
+                                        reportarError("Falta la lista de sentencias en la función")
+                                    }
                                 } else {
-                                    reportarError("Falta la lista de sentencias en la función")
+                                    reportarError("Falta la llave izquierda")
                                 }
                             } else {
                                 reportarError("Falta el tipo de retorno en la función")
@@ -468,8 +476,6 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
             } else {
                 reportarError("La función debe llevar un identificador")
             }
-        } else {
-            reportarError("Debe iniciar con la palabra fun")
         }
         return null
     }
