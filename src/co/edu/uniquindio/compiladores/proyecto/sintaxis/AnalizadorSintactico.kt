@@ -150,9 +150,10 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
                     if (tokenActual.categoria == Categoria.OPERADOR_ASIGNACION && tokenActual.palabra == "=") {
                         obtenerSiguienteToken()
 
-                        var expresion = esExpresion()
+                        if (tokenActual.categoria == Categoria.IDENTIFICADOR)
+                        var identificador2 = tokenActual.palabra
+                        obtenerSiguienteToken()
 
-                        if (expresion != null) {
                             if (tokenActual.categoria == Categoria.FIN_SENTENCIA) {
                                 obtenerSiguienteToken()
                                 //la declaracion de la variable esta bien escrita
@@ -196,7 +197,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
     /**
      * <Expresion> ::= [<Relacional>] | [<Logico>] | [<Aritmetico>] | [<ExpresionCadena>]
      */
-    fun esExpresion(): Expresion? {
+    fun tokenActual.palabraesExpresion(): Expresion? {
         var relacional = esRelacional()
         if (relacional != null) {
             return Expresion(relacional)
