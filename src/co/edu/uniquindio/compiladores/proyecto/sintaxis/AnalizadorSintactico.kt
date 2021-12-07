@@ -150,20 +150,18 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
                     if (tokenActual.categoria == Categoria.OPERADOR_ASIGNACION && tokenActual.palabra == "=") {
                         obtenerSiguienteToken()
 
-                        if (tokenActual.categoria == Categoria.IDENTIFICADOR)
+                        if (tokenActual.categoria == Categoria.IDENTIFICADOR){
                         var identificador2 = tokenActual.palabra
                         obtenerSiguienteToken()
 
                             if (tokenActual.categoria == Categoria.FIN_SENTENCIA) {
                                 obtenerSiguienteToken()
                                 //la declaracion de la variable esta bien escrita
-                                return DeclaracionVariable(tipoDato.palabra, identificador, expresion)
+                                return DeclaracionVariable(tipoDato.palabra, identificador, identificador2)
                             } else {
                                 reportarError("Falta el fin de sentencia")
                             }
-                        } else {
-                            reportarError("Falta la expresion en la declaración de la variable")
-                        }
+
                     } else {
                         reportarError("Falta el operador '='")
                     }
@@ -367,19 +365,18 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
                     if (tokenActual.categoria == Categoria.OPERADOR_ASIGNACION && tokenActual.palabra == "=") {
                         obtenerSiguienteToken()
 
-                        var expresion = esExpresion()
+                        if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
+                            var identificador2 = tokenActual.palabra
+                            obtenerSiguienteToken()
 
-                        if (expresion != null) {
                             if (tokenActual.categoria == Categoria.FIN_SENTENCIA) {
                                 obtenerSiguienteToken()
                                 //la declaracion de la variable esta bien escrita
-                                return DeclaracionVariableI(tipoDato.palabra, identificador, expresion)
+                                return DeclaracionVariableI(tipoDato.palabra, identificador, identificador2)
                             } else {
                                 reportarError("Falta el fin de sentencia")
                             }
-                        } else {
-                            reportarError("Falta la expresion en la declaración de la variable inmutable")
-                        }
+
 
                     }
 
@@ -935,7 +932,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
     }
 
     /**
-     * <LecturaDatos> ::= identificador “=” valor”;”
+     * <LecturaDatos> ::= identificador “=" read”;”
      */
     fun esLecturaDatos(): LecturaDatos? {
         var posicionInicial = posicionActual
@@ -944,17 +941,16 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
             obtenerSiguienteToken()
             if (tokenActual.categoria == Categoria.OPERADOR_ASIGNACION && tokenActual.palabra == "=") {
                 obtenerSiguienteToken()
-                val valor = tokenActual
-                if (valor != null) {
+                if (tokenActual.categoria == Categoria.PALABRA_RESERVADA && tokenActual.palabra == "read") {
                     obtenerSiguienteToken()
                     if (tokenActual.categoria == Categoria.FIN_SENTENCIA) {
                         obtenerSiguienteToken()
-                        return LecturaDatos(identificador, valor)
+                        return LecturaDatos(identificador)
                     } else {
                         reportarError("No se encuentra el fin de sentencia")
                     }
                 } else {
-                    reportarError("No se encuentra el valor")
+                    reportarError("No se encontró la palabra reservada read")
                 }
             } else {
                 reportarError("No se encuentra el operador '='")

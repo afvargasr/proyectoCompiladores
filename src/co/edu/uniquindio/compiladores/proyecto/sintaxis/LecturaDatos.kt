@@ -2,8 +2,8 @@ package co.edu.uniquindio.compiladores.proyecto.sintaxis
 
 import co.edu.uniquindio.compiladores.proyecto.lexico.Token
 
-class LecturaDatos(var identificador: Token, var valor: Token) {
+class LecturaDatos(var identificador) {
     override fun toString(): String {
-        return "LecturaDatos(identificador=$identificador, valor=$valor)"
+        return "LecturaDatos(identificador=$identificador)"
     }
 }

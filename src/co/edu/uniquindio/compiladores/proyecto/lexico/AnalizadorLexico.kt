@@ -16,8 +16,7 @@ class AnalizadorLexico(var codigoFuente: String) {
     var finCodigo = 0.toChar()
     var palabrasReservadas = listOf<String>(
         "int", "void", "float", "var", "fun", "final", "for", "while", "string", "if", "boolean",
-        "cons", "import", "return", "else", "print"
-    )
+        "cons", "import", "return", "else", "print","read")
 
     fun almacenarToken(palabra: String, categoria: Categoria, fila: Int, columna: Int) =
         listaTokens.add(Token(palabra, categoria, fila, columna))
