@@ -16,8 +16,7 @@ class AnalizadorLexico(var codigoFuente: String) {
     var finCodigo = 0.toChar()
     var palabrasReservadas = listOf<String>(
         "int", "void", "float", "var", "fun", "final", "for", "while", "string", "if", "boolean",
-        "cons", "import", "return", "else", "print"
-    )
+        "cons", "import", "return", "else", "print","read")
 
     fun almacenarToken(palabra: String, categoria: Categoria, fila: Int, columna: Int) =
         listaTokens.add(Token(palabra, categoria, fila, columna))
@@ -47,13 +46,13 @@ class AnalizadorLexico(var codigoFuente: String) {
             if (esDecimal()) continue
             if (esReservada()) continue
             if (esIdentificador()) continue
-            if (esOperadorLogico()) continue
             if (esParentesisIzquierdo()) continue
             if (esParentesisDerecho()) continue
             if (esCorcheteIzquierdo()) continue
             if (esCorcheteDerecho()) continue
             if (esLlaveIzquierda()) continue
             if (esLlaveDerecha()) continue
+            if (esOperadorLogico()) continue
             if (esOperadorRelacional()) continue
             if (esAsignacion()) continue
             if (esIncrementoODecremento()) continue
@@ -203,7 +202,6 @@ class AnalizadorLexico(var codigoFuente: String) {
             }
 
             almacenarToken(palabra, Categoria.DECIMAL, fila, columna)
-            obtenerSgteCaracter()
             return true
 
         }
@@ -405,6 +403,8 @@ class AnalizadorLexico(var codigoFuente: String) {
                     //RE
                     throw ReporteErrorException("No se encontró el cierre del carácter")
                 }
+            } else {
+                throw ReporteErrorException("No se encontró el carácter")
             }
         }
 
