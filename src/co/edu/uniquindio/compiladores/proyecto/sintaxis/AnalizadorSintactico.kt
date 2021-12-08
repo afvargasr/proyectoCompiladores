@@ -580,7 +580,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
     }
 
     /**
-     * <Sentencia> ::= <Decision> | <DeclaracionVariableMutable> | <DeclaracionVariableInmutable> | <Asignacion> | <ImpresionDatos> | <Ciclo> | <DeclaracionArreglos> | <InicializacionArreglos> | <Retorno> | <LecturaDatos> | <InvocacionFuncion> | <Incremento> | <Decremento>
+     * <Sentencia> ::= <Decision> | <DeclaracionVariableMutable> | <DeclaracionVariableInmutable> | <Asignacion> | <ImpresionDatos> | <Ciclo> | <DeclaracionArreglos> | <InicializacionArreglos> | <LecturaDatos> | <InvocacionFuncion> | <Incremento> | <Decremento>
      */
     fun esSentencia(): Sentencia? {
         var posicionInicial = posicionActual
@@ -641,13 +641,6 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
             hacerBT(posicionInicial)
         }
 
-        val retorno = esRetorno()
-        if (retorno != null) {
-            return Sentencia(retorno)
-        } else {
-            hacerBT(posicionInicial)
-        }
-
         val lecturaDatos = esLecturaDatos()
         if (lecturaDatos != null) {
             return Sentencia(lecturaDatos)
@@ -687,6 +680,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
         if (tokenActual.categoria == Categoria.PALABRA_RESERVADA && tokenActual.palabra == "if") {
             obtenerSiguienteToken()
             if (tokenActual.categoria == Categoria.PARENTESIS_IZQUIERDO) {
+                obtenerSiguienteToken()
                 var expresiones = esExpresion()
                 if (expresiones != null) {
                     if (tokenActual.categoria == Categoria.PARENTESIS_DERECHO) {
@@ -799,11 +793,13 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
         if (tokenActual.categoria == Categoria.PALABRA_RESERVADA && tokenActual.palabra == "while") {
             obtenerSiguienteToken()
             if (tokenActual.categoria == Categoria.PARENTESIS_IZQUIERDO) {
+                obtenerSiguienteToken()
                 var expresion = esLogico()
                 if (expresion != null) {
                     if (tokenActual.categoria == Categoria.PARENTESIS_DERECHO) {
                         obtenerSiguienteToken()
                         if (tokenActual.categoria == Categoria.LLAVE_IZQUIERDA) {
+                            obtenerSiguienteToken()
                             val sentencias = esListaSentencias()
                             if (sentencias != null) {
                                 if (tokenActual.categoria == Categoria.LLAVE_DERECHA) {
@@ -832,24 +828,32 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
     }
 
     /**
-     * <DeclaracionArreglos> ::= <TipoDato> identificador ”;”
+     * <DeclaracionArreglos> ::= <TipoDato> "[""]" identificador ”;”
      */
     fun esDeclaracionArreglos(): DeclaracionArreglo? {
         var posicionInicial = posicionActual
         val tipoDato = esTipoDato()
         if (tipoDato != null) {
-            if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
-                val identificador = tokenActual
+            if(tokenActual.categoria == Categoria.CORCHETE_IZQUIERDO){
                 obtenerSiguienteToken()
-                if (tokenActual.categoria == Categoria.FIN_SENTENCIA) {
+                if(tokenActual.categoria == Categoria.CORCHETE_DERECHO)
+                {
                     obtenerSiguienteToken()
-                    return DeclaracionArreglo(tipoDato, identificador)
-                } else {
-                    reportarError("No se encuentra el fin de sentencia")
+                    if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
+                        val identificador = tokenActual
+                        obtenerSiguienteToken()
+                        if (tokenActual.categoria == Categoria.FIN_SENTENCIA) {
+                            obtenerSiguienteToken()
+                            return DeclaracionArreglo(tipoDato, identificador)
+                        } else {
+                            reportarError("No se encuentra el fin de sentencia")
+                        }
+                    } else {
+                        reportarError("No se encuentra el identificador")
+                    }
                 }
-            } else {
-                reportarError("No se encuentra el identificador")
             }
+
         }
         hacerBT(posicionInicial)
         return null
@@ -904,7 +908,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
      */
     fun esListaValores(): ArrayList<String> {
         var valores = ArrayList<String>()
-        if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
+        if (tokenActual.categoria == Categoria.IDENTIFICADOR || tokenActual.categoria == Categoria.ENTERO || tokenActual.categoria == Categoria.DECIMAL || tokenActual.categoria == Categoria.CADENA_CARACTERES) {
             var valor = tokenActual.palabra
             while (valor != null) {
                 valores.add(valor)
@@ -985,7 +989,6 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
      * <ListaArgumentos> ::= <Argumento> [“,” <ListaArgumentos>]
      */
     fun esListaArgumentos(): ArrayList<Argumento> {
-        var posicionInicial = posicionActual
         var listaArgumentos = ArrayList<Argumento>()
         var argumento = esArgumento()
         while (argumento != null) {
@@ -1000,7 +1003,6 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
                 break
             }
         }
-        hacerBT(posicionInicial)
         return listaArgumentos
     }
 
