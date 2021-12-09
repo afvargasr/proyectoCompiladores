@@ -1,8 +1,9 @@
 package co.edu.uniquindio.compiladores.proyecto.sintaxis
 
+import co.edu.uniquindio.compiladores.proyecto.lexico.Token
 import javafx.scene.control.TreeItem
 
-class Invocacion(var identificador: String, var argumentos: ArrayList<Argumento>) : Sentencia() {
+class Invocacion(var identificador: Token, var argumentos: ArrayList<Argumento>) : Sentencia() {
     override fun toString(): String {
         return "Invocacion(identificador='$identificador', argumentos=$argumentos)"
     }

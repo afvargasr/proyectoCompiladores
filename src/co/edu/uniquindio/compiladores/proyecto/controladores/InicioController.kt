@@ -2,6 +2,7 @@ package co.edu.uniquindio.compiladores.proyecto.controladores
 
 import co.edu.uniquindio.compiladores.proyecto.lexico.AnalizadorLexico
 import co.edu.uniquindio.compiladores.proyecto.lexico.Token
+import co.edu.uniquindio.compiladores.proyecto.semantica.AnalizadorSemantico
 import co.edu.uniquindio.compiladores.proyecto.sintaxis.AnalizadorSintactico
 import javafx.collections.FXCollections
 import javafx.fxml.FXML
@@ -46,6 +47,12 @@ class InicioController: Initializable {
 
             if (uc != null) {
                 arbolVisual.root = uc.getArbolVisual()
+
+                val semantica = AnalizadorSemantico(uc!!)
+                semantica.llenarTablaSimbolos()
+                print(semantica.tablaSimbolos)
+                print(semantica.tablaSimbolos)
+                print(semantica.listaErrores)
             } else {
                 var alerta = Alert(Alert.AlertType.WARNING)
                 alerta.headerText = "Mensaje de Error"

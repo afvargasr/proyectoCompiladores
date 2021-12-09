@@ -1,8 +1,11 @@
 package co.edu.uniquindio.compiladores.proyecto.sintaxis
 
+import co.edu.uniquindio.compiladores.proyecto.lexico.Error
+import co.edu.uniquindio.compiladores.proyecto.lexico.Token
+import co.edu.uniquindio.compiladores.proyecto.semantica.TablaSimbolos
 import javafx.scene.control.TreeItem
 
-class Funcion(var identificador: String, var listaParametros : ArrayList<Parametro>, var tipoRetorno: String, var listaSentencias: ArrayList<Sentencia>, var retorno: Retorno? )
+class Funcion(var identificador: Token, var listaParametros : ArrayList<Parametro>, var tipoRetorno: String, var listaSentencias: ArrayList<Sentencia>, var retorno: Retorno? )
 {
     override fun toString(): String {
         return "Funcion(identificador='$identificador', listaParametros=$listaParametros, tipoRetorno='$tipoRetorno', listaSentencias=$listaSentencias, retorno=$retorno)"
@@ -32,4 +35,29 @@ class Funcion(var identificador: String, var listaParametros : ArrayList<Paramet
         return raiz
     }
 
+    fun obtenerTiposParametros():ArrayList<String> {
+        var lista= ArrayList<String>( )
+        for(p in listaParametros){
+            lista.add(p.tipoDato.palabra)
+        }
+        return lista
+    }
+
+    fun llenarTablaSimbolos(tablaSimbolos: TablaSimbolos, listaErrores: ArrayList<Error>, ambito: String){
+        tablaSimbolos.guardarSimboloMetodo(identificador.palabra, tipoRetorno, obtenerTiposParametros(), ambito, identificador.fila, identificador.columna)
+
+        for (p in listaParametros){
+            tablaSimbolos.guardarSimboloValor(p.identificador.palabra, p.tipoDato.palabra, true, ambito, p.identificador.fila, p.identificador.columna)
+        }
+
+        for (s in listaSentencias){
+            s.llenarTablaSimbolos(tablaSimbolos, listaErrores, ambito)
+        }
+    }
+
+    fun analizarSemantica(tablaSimbolos:TablaSimbolos, listaErrores: ArrayList<Error>){
+        for(s in listaSentencias){
+            s.analizarSemantica(tablaSimbolos, listaErrores, identificador.palabra)
+        }
+    }
 }

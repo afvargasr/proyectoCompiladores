@@ -99,7 +99,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
             obtenerSiguienteToken()
 
             if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
-                var identificador = tokenActual.palabra
+                var identificador = tokenActual
 
                 obtenerSiguienteToken()
 
@@ -144,7 +144,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
 
             if (tipoDato != null) {
                 if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
-                    var identificador = tokenActual.palabra
+                    var identificador = tokenActual
                     obtenerSiguienteToken()
 
                     if (tokenActual.categoria == Categoria.OPERADOR_ASIGNACION && tokenActual.palabra == "=") {
@@ -225,7 +225,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
     fun esRelacional(): Relacional? {
         var posicionInicial = posicionActual
         if (tokenActual.categoria == Categoria.IDENTIFICADOR || tokenActual.categoria == Categoria.ENTERO || tokenActual.categoria == Categoria.DECIMAL) {
-            var identificador1 = tokenActual.palabra
+            var identificador1 = tokenActual
             obtenerSiguienteToken()
 
             if (tokenActual.categoria == Categoria.OPERADOR_RELACIONAL) {
@@ -233,7 +233,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
                 obtenerSiguienteToken()
 
                 if (tokenActual.categoria == Categoria.IDENTIFICADOR || tokenActual.categoria == Categoria.ENTERO || tokenActual.categoria == Categoria.DECIMAL) {
-                    var identificador2 = tokenActual.palabra
+                    var identificador2 = tokenActual
                     obtenerSiguienteToken()
 
                     //La expresión relacional esta bien escrita
@@ -253,7 +253,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
     fun esLogico(): Logico? {
         var posicionInicial = posicionActual
         if (tokenActual.categoria == Categoria.IDENTIFICADOR || tokenActual.categoria == Categoria.ENTERO || tokenActual.categoria == Categoria.DECIMAL) {
-            var identificador1 = tokenActual.palabra
+            var identificador1 = tokenActual
             obtenerSiguienteToken()
 
             if (tokenActual.categoria == Categoria.OPERADOR_LOGICO) {
@@ -261,7 +261,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
                 obtenerSiguienteToken()
 
                 if (tokenActual.categoria == Categoria.IDENTIFICADOR || tokenActual.categoria == Categoria.ENTERO || tokenActual.categoria == Categoria.DECIMAL) {
-                    var identificador2 = tokenActual.palabra
+                    var identificador2 = tokenActual
                     obtenerSiguienteToken()
 
                     //La expresión relacional esta bien escrita
@@ -281,7 +281,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
     fun esAritmetico(): Aritmetico? {
         var posicionInicial = posicionActual
         if (tokenActual.categoria == Categoria.ENTERO || tokenActual.categoria == Categoria.DECIMAL) {
-            var identificador1 = tokenActual.palabra
+            var identificador1 = tokenActual
             obtenerSiguienteToken()
 
             if (tokenActual.categoria == Categoria.OPERADOR_ARTIMETICO) {
@@ -289,7 +289,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
                 obtenerSiguienteToken()
 
                 if (tokenActual.categoria == Categoria.ENTERO || tokenActual.categoria == Categoria.DECIMAL) {
-                    var identificador2 = tokenActual.palabra
+                    var identificador2 = tokenActual
                     obtenerSiguienteToken()
 
                     //La expresión relacional esta bien escrita
@@ -352,7 +352,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
             if (tipoDato != null) {
 
                 if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
-                    var identificador = tokenActual.palabra
+                    var identificador = tokenActual
                     obtenerSiguienteToken()
 
                     if (tokenActual.categoria == Categoria.OPERADOR_ASIGNACION && tokenActual.palabra == "=") {
@@ -403,7 +403,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
             obtenerSiguienteToken()
 
             if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
-                var identificador = tokenActual.palabra
+                var identificador = tokenActual
                 obtenerSiguienteToken()
 
                 if (tokenActual.categoria == Categoria.PARENTESIS_IZQUIERDO) {
@@ -550,7 +550,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
         if (tokenActual.categoria == Categoria.PALABRA_RESERVADA && tokenActual.palabra == "return") {
             obtenerSiguienteToken()
             if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
-                var identificador = tokenActual.palabra
+                var identificador = tokenActual
                 obtenerSiguienteToken()
                 if (tokenActual.categoria == Categoria.FIN_SENTENCIA) {
                     obtenerSiguienteToken()
@@ -961,7 +961,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
     fun esInvocacionFuncion(): Invocacion? {
         var posicionInicial = posicionActual
         if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
-            val identificador = tokenActual.palabra
+            val identificador = tokenActual
             obtenerSiguienteToken()
             if (tokenActual.categoria == Categoria.PARENTESIS_IZQUIERDO) {
                 obtenerSiguienteToken()

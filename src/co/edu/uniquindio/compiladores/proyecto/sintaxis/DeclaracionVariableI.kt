@@ -1,14 +1,16 @@
 package co.edu.uniquindio.compiladores.proyecto.sintaxis
 
+import co.edu.uniquindio.compiladores.proyecto.lexico.Error
 import co.edu.uniquindio.compiladores.proyecto.lexico.Token
+import co.edu.uniquindio.compiladores.proyecto.semantica.TablaSimbolos
 import javafx.scene.control.TreeItem
 
-class DeclaracionVariableI(var tipoDato: String, var identificador: String, var valor: Token) {
+class DeclaracionVariableI(var tipoDato: String, var identificador: Token, var valor: Token):Sentencia() {
     override fun toString(): String {
         return "DeclaracionVariableI(tipoDato='$tipoDato', identificador='$identificador', valor=$valor)"
     }
 
-    fun getArbolVisual(): TreeItem<String> {
+    override fun getArbolVisual(): TreeItem<String> {
 
         var raiz = TreeItem("Declaración Variable Inmutable")
 
@@ -17,5 +19,9 @@ class DeclaracionVariableI(var tipoDato: String, var identificador: String, var 
         raiz.children.add(TreeItem("$valor"))
 
         return raiz
+    }
+
+    override fun llenarTablaSimbolos(tablaSimbolos: TablaSimbolos, listaErrores: ArrayList<Error>, ambito: String){
+        tablaSimbolos.guardarSimboloValor(identificador.palabra, tipoDato, false, ambito, identificador.fila, identificador.columna)
     }
 }
