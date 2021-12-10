@@ -1,6 +1,7 @@
 package co.edu.uniquindio.compiladores.proyecto.controladores
 
 import co.edu.uniquindio.compiladores.proyecto.lexico.AnalizadorLexico
+import co.edu.uniquindio.compiladores.proyecto.lexico.Error
 import co.edu.uniquindio.compiladores.proyecto.lexico.Token
 import co.edu.uniquindio.compiladores.proyecto.semantica.AnalizadorSemantico
 import co.edu.uniquindio.compiladores.proyecto.sintaxis.AnalizadorSintactico
@@ -24,10 +25,22 @@ class InicioController: Initializable {
     private lateinit var colFila: TableColumn<Token, Int>
 
     @FXML
+    private lateinit var colError: TableColumn<Token, String>
+
+    @FXML
+    private lateinit var colCol: TableColumn<Token, Int>
+
+    @FXML
+    private lateinit var colFil: TableColumn<Token, Int>
+
+    @FXML
     private lateinit var colLexema: TableColumn<Token, String>
 
     @FXML
     private lateinit var tblTokens: TableView<Token>
+
+    @FXML
+    private lateinit var tblError: TableView<Error>
 
     @FXML
     private lateinit var txtData: TextArea
@@ -47,10 +60,9 @@ class InicioController: Initializable {
 
             if (uc != null) {
                 arbolVisual.root = uc.getArbolVisual()
-
                 val semantica = AnalizadorSemantico(uc!!)
                 semantica.llenarTablaSimbolos()
-                print(semantica.tablaSimbolos)
+                tblError.items = FXCollections.observableArrayList(semantica.listaErrores)
                 print(semantica.tablaSimbolos)
                 print(semantica.listaErrores)
             } else {
@@ -67,6 +79,10 @@ class InicioController: Initializable {
         colCategoria.cellValueFactory = PropertyValueFactory("categoria")
         colFila.cellValueFactory = PropertyValueFactory("fila")
         colColumna.cellValueFactory = PropertyValueFactory("columna")
+
+        colError.cellValueFactory = PropertyValueFactory("error")
+        colFil.cellValueFactory = PropertyValueFactory("fila")
+        colCol.cellValueFactory = PropertyValueFactory("columna")
 
     }
 

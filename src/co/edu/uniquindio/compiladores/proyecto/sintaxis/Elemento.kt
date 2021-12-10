@@ -37,11 +37,35 @@ class Elemento(var listaImports: ArrayList<Import>, var listaDeclaracionVariable
         for (f in listaFuncion){
             f.llenarTablaSimbolos(tablaSimbolos, listaErrores, ambito)
         }
+
+        for (i in listaImports){
+            i.llenarTablaSimbolos(tablaSimbolos, listaErrores, ambito)
+        }
+
+        for (v in listaDeclaracionVariable){
+            v.llenarTablaSimbolos(tablaSimbolos, listaErrores, ambito)
+        }
+
+        for (vi in listaDeclaracionVariableI){
+            vi.llenarTablaSimbolos(tablaSimbolos, listaErrores, ambito)
+        }
     }
 
-    fun analizarSemantica(tablaSimbolos:TablaSimbolos, listaErrores: ArrayList<Error>){
+    fun analizarSemantica(tablaSimbolos: TablaSimbolos, listaErrores: ArrayList<Error>){
         for (f in listaFuncion){
             f.analizarSemantica(tablaSimbolos, listaErrores)
+        }
+
+        for (i in listaImports){
+            i.analizarSemantica(tablaSimbolos, listaErrores)
+        }
+
+        for (v in listaDeclaracionVariable){
+            v.analizarSemantica(tablaSimbolos, listaErrores)
+        }
+
+        for (vi in listaDeclaracionVariableI){
+            vi.analizarSemantica(tablaSimbolos, listaErrores)
         }
     }
 

@@ -26,7 +26,7 @@ class DeclaracionVariable(var tipoDato: String, var identificador: Token, var va
         tablaSimbolos.guardarSimboloValor(identificador.palabra, tipoDato, true, ambito, identificador.fila, identificador.columna)
     }
 
-    fun analizarSemantica(tablaSimbolos:TablaSimbolos, listaErrores: ArrayList<Error>){
+    override fun analizarSemantica(tablaSimbolos:TablaSimbolos, listaErrores: ArrayList<Error>, ambito: String){
         analizarSemantica(tablaSimbolos, listaErrores, identificador.palabra)
     }
 }

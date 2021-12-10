@@ -1,6 +1,8 @@
 package co.edu.uniquindio.compiladores.proyecto.sintaxis
 
+import co.edu.uniquindio.compiladores.proyecto.lexico.Error
 import co.edu.uniquindio.compiladores.proyecto.lexico.Token
+import co.edu.uniquindio.compiladores.proyecto.semantica.TablaSimbolos
 import javafx.scene.control.TreeItem
 
 class Import(var identificador: Token)
@@ -17,5 +19,13 @@ class Import(var identificador: Token)
 
         return raiz
 
+    }
+
+    fun llenarTablaSimbolos(tablaSimbolos: TablaSimbolos, listaErrores: ArrayList<Error>, ambito: String){
+        tablaSimbolos.guardarSimboloValor(identificador.palabra, identificador.categoria.toString(), true, ambito, identificador.fila, identificador.columna)
+    }
+
+    fun analizarSemantica(tablaSimbolos: TablaSimbolos, listaErrores: ArrayList<Error>){
+        analizarSemantica(tablaSimbolos, listaErrores)
     }
 }

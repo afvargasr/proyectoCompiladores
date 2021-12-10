@@ -47,11 +47,11 @@ class Funcion(var identificador: Token, var listaParametros : ArrayList<Parametr
         tablaSimbolos.guardarSimboloMetodo(identificador.palabra, tipoRetorno, obtenerTiposParametros(), ambito, identificador.fila, identificador.columna)
 
         for (p in listaParametros){
-            tablaSimbolos.guardarSimboloValor(p.identificador.palabra, p.tipoDato.palabra, true, ambito, p.identificador.fila, p.identificador.columna)
+            tablaSimbolos.guardarSimboloValor(p.identificador.palabra, p.tipoDato.palabra, true, identificador.palabra, p.identificador.fila, p.identificador.columna)
         }
 
         for (s in listaSentencias){
-            s.llenarTablaSimbolos(tablaSimbolos, listaErrores, ambito)
+            s.llenarTablaSimbolos(tablaSimbolos, listaErrores,  identificador.palabra)
         }
     }
 
@@ -59,5 +59,21 @@ class Funcion(var identificador: Token, var listaParametros : ArrayList<Parametr
         for(s in listaSentencias){
             s.analizarSemantica(tablaSimbolos, listaErrores, identificador.palabra)
         }
+
+        for(p in listaParametros){
+            p.analizarSemantica(tablaSimbolos, listaErrores, identificador.palabra)
+        }
+
+        retorno?.analizarSemantica(tablaSimbolos, listaErrores, "Funcion")
+        if (tipoRetorno != null){
+            var retornoFinal = retorno?.obtenerTipoRetorno()
+
+            if (tipoRetorno != retornoFinal){
+                listaErrores.add(Error("El tipo de retorno $retorno no coincide con el retorno $retornoFinal", identificador.fila, identificador.columna))
+            }else{
+                println("Probando")
+            }
+        }
+
     }
 }

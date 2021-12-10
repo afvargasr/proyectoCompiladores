@@ -197,22 +197,22 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
     fun esExpresion(): Expresion? {
         var relacional = esRelacional()
         if (relacional != null) {
-            return Expresion(relacional)
+            return relacional
         }
 
         var logico = esLogico()
         if (logico != null) {
-            return Expresion(logico)
+            return logico
         }
 
         var aritmetico = esAritmetico()
         if (aritmetico != null) {
-            return Expresion(aritmetico)
+            return aritmetico
         }
 
         var expresionCadena = esExpresionCadena()
         if (expresionCadena != null) {
-            return Expresion(expresionCadena)
+            return expresionCadena
         }
 
         reportarError("No se detectó ninguna expresión")
@@ -549,7 +549,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
     fun esRetorno(): Retorno? {
         if (tokenActual.categoria == Categoria.PALABRA_RESERVADA && tokenActual.palabra == "return") {
             obtenerSiguienteToken()
-            if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
+            if (tokenActual.categoria == Categoria.IDENTIFICADOR || tokenActual.categoria == Categoria.ENTERO || tokenActual.categoria == Categoria.DECIMAL || tokenActual.categoria == Categoria.CADENA_CARACTERES) {
                 var identificador = tokenActual
                 obtenerSiguienteToken()
                 if (tokenActual.categoria == Categoria.FIN_SENTENCIA) {
@@ -587,84 +587,84 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
 
         val decision = esDecision()
         if (decision != null) {
-            return Sentencia(decision)
+            return decision
         } else {
             hacerBT(posicionInicial)
         }
 
         val declaracionVariableMutable = esDeclaracionVariable()
         if (declaracionVariableMutable != null) {
-            return Sentencia(declaracionVariableMutable)
+            return declaracionVariableMutable
         } else {
             hacerBT(posicionInicial)
         }
 
         val declaracionVariableInmutable = esDeclaracionVariableI()
         if (declaracionVariableInmutable != null) {
-            return Sentencia(declaracionVariableInmutable)
+            return declaracionVariableInmutable
         } else {
             hacerBT(posicionInicial)
         }
 
         val asignacion = esAsignacion()
         if (asignacion != null) {
-            return Sentencia(asignacion)
+            return asignacion
         } else {
             hacerBT(posicionInicial)
         }
 
         val impresionDatos = esImpresionDatos()
         if (impresionDatos != null) {
-            return Sentencia(impresionDatos)
+            return impresionDatos
         } else {
             hacerBT(posicionInicial)
         }
 
         val ciclo = esCiclo()
         if (ciclo != null) {
-            return Sentencia(ciclo)
+            return ciclo
         } else {
             hacerBT(posicionInicial)
         }
 
         val declaracionArreglos = esDeclaracionArreglos()
         if (declaracionArreglos != null) {
-            return Sentencia(declaracionArreglos)
+            return declaracionArreglos
         } else {
             hacerBT(posicionInicial)
         }
 
         val inicializacionArreglos = esInicializacionArreglos()
         if (inicializacionArreglos != null) {
-            return Sentencia(inicializacionArreglos)
+            return inicializacionArreglos
         } else {
             hacerBT(posicionInicial)
         }
 
         val lecturaDatos = esLecturaDatos()
         if (lecturaDatos != null) {
-            return Sentencia(lecturaDatos)
+            return lecturaDatos
         } else {
             hacerBT(posicionInicial)
         }
 
         val invocacionFuncion = esInvocacionFuncion()
         if (invocacionFuncion != null) {
-            return Sentencia(invocacionFuncion)
+            return invocacionFuncion
         } else {
             hacerBT(posicionInicial)
         }
 
         val incremento = esIncremento()
         if (incremento != null) {
-            return Sentencia(incremento)
+            return incremento
         } else {
             hacerBT(posicionInicial)
         }
 
         val decremento = esDecremento()
         if (decremento != null) {
-            return Sentencia(decremento)
+            return decremento
         } else {
             hacerBT(posicionInicial)
         }
@@ -1010,7 +1010,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
      * <Argumento> ::= identificador
      */
     fun esArgumento(): Argumento? {
-        if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
+        if (tokenActual.categoria == Categoria.DECIMAL || tokenActual.categoria == Categoria.ENTERO || tokenActual.categoria == Categoria.CADENA_CARACTERES) {
             val identificador = tokenActual
             obtenerSiguienteToken()
             return Argumento(identificador)

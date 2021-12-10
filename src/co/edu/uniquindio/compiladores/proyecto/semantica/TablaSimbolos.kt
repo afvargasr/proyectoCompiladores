@@ -18,7 +18,6 @@ class TablaSimbolos (var listaErrores: ArrayList<Error>){
         }else{
             listaErrores.add(Error("El campo $nombre ya existe en el ámbito $ambito", fila, columna))
         }
-
     }
 
     /**
@@ -64,6 +63,4 @@ class TablaSimbolos (var listaErrores: ArrayList<Error>){
     override fun toString(): String {
         return "TablaSimbolos(listaSimbolos=$listaSimbolos)"
     }
-
-
 }
