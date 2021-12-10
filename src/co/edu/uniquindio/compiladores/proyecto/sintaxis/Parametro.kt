@@ -1,6 +1,8 @@
 package co.edu.uniquindio.compiladores.proyecto.sintaxis
 
+import co.edu.uniquindio.compiladores.proyecto.lexico.Error
 import co.edu.uniquindio.compiladores.proyecto.lexico.Token
+import co.edu.uniquindio.compiladores.proyecto.semantica.TablaSimbolos
 import javafx.scene.control.TreeItem
 
 class Parametro(var tipoDato: Token, var identificador: Token) {
@@ -18,5 +20,13 @@ class Parametro(var tipoDato: Token, var identificador: Token) {
         raiz.children.add(TreeItem("Identificador: " + "${identificador.palabra}"))
 
         return raiz
+    }
+
+    open fun llenarTablaSimbolos(tablaSimbolos: TablaSimbolos, listaErrores: ArrayList<Error>, ambito: String){
+
+    }
+
+    open fun analizarSemantica(tablaSimbolos: TablaSimbolos, listaErrores: ArrayList<Error>, ambito: String){
+
     }
 }
