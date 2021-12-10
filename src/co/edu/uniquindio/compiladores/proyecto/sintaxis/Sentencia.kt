@@ -1,21 +1,24 @@
 package co.edu.uniquindio.compiladores.proyecto.sintaxis
 
+import co.edu.uniquindio.compiladores.proyecto.lexico.Error
+import co.edu.uniquindio.compiladores.proyecto.semantica.TablaSimbolos
 import javafx.scene.control.TreeItem
 
-open class Sentencia(var sentencia: Any?) {
-
-    constructor() : this(null)
-
-    override fun toString(): String {
-        return "Sentencia(sentencia=$sentencia)"
-    }
+open class Sentencia {
 
     open fun getArbolVisual(): TreeItem<String>? {
+        return TreeItem("Sentencia")
+    }
 
-        var raiz = TreeItem("Sentencia")
+    open fun llenarTablaSimbolos(tablaSimbolos:TablaSimbolos, listaErrores: ArrayList<Error>, ambito: String){
 
-        raiz.children.add(TreeItem("Sentencia: " + "$sentencia"))
+    }
 
-        return raiz
+    open fun analizarSemantica(tablaSimbolos:TablaSimbolos, listaErrores: ArrayList<Error>, ambito: String){
+
+    }
+
+    fun analizarSemantica(tablaSimbolos: TablaSimbolos, listaErrores: ArrayList<Error>) {
+
     }
 }
