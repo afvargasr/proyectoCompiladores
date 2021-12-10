@@ -48,4 +48,19 @@ class Invocacion(var identificador: Token, var argumentos: ArrayList<Argumento>)
         }
         return lista
     }
+
+    override fun getJavaCode(): String
+    {
+        var codigo = identificador.getJavaCode() + "("
+        for(a in argumentos)
+        {
+            codigo+= a.getJavaCode() + ","
+        }
+        codigo+= codigo.substring(0,codigo.length-1)
+        codigo+= ")"
+
+        return codigo
+
+    }
+
 }

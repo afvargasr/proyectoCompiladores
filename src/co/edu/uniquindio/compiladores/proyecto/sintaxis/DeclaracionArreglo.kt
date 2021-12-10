@@ -13,4 +13,7 @@ class DeclaracionArreglo(var tipoDato: Token, var identificador: Token): Sentenc
         tablaSimbolos.guardarSimboloValor(identificador.palabra, tipoDato.palabra, true, ambito, identificador.fila, identificador.columna)
     }
 
+    override fun getJavaCode(): String {
+        return tipoDato.getJavaCode() + "[] " + identificador.getJavaCode() + ";"
+    }
 }

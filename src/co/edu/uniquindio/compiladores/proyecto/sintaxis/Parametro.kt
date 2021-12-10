@@ -29,4 +29,9 @@ class Parametro(var tipoDato: Token, var identificador: Token) {
     open fun analizarSemantica(tablaSimbolos: TablaSimbolos, listaErrores: ArrayList<Error>, ambito: String){
 
     }
+
+    fun getJavaCode(): String
+    {
+        return tipoDato.getJavaCode() + " " + identificador.getJavaCode()
+    }
 }

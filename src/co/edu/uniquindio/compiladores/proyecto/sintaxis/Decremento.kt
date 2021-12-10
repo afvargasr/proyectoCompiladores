@@ -6,4 +6,10 @@ class Decremento(var identificador: Token): Sentencia() {
     override fun toString(): String {
         return "Decremento(identificador=$identificador)"
     }
+
+    override fun  getJavaCode(): String
+    {
+
+        return identificador.getJavaCode()+"--" + ";"
+    }
 }

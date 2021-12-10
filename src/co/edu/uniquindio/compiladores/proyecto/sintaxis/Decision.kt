@@ -4,12 +4,12 @@ import co.edu.uniquindio.compiladores.proyecto.lexico.Error
 import co.edu.uniquindio.compiladores.proyecto.semantica.TablaSimbolos
 
 class Decision(
-    var expresiones: Expresion,
+    var expresion: Expresion,
     var sentenciasIf: ArrayList<Sentencia>,
     var setenciasElse: ArrayList<Sentencia>
 ): Sentencia() {
     override fun toString(): String {
-        return "Decision(expresiones=$expresiones, sentenciasIf=$sentenciasIf, setenciasElse=$setenciasElse)"
+        return "Decision(expresion=$expresion, sentenciasIf=$sentenciasIf, setenciasElse=$setenciasElse)"
     }
 
     override fun llenarTablaSimbolos(tablaSimbolos: TablaSimbolos, listaErrores: ArrayList<Error>, ambito: String){
@@ -23,4 +23,23 @@ class Decision(
         }
 
     }
+
+    override fun getJavaCode(): String {
+        var codigo = "if("+expresion.getJavaCode()+"){"
+        for(s in sentenciasIf ) {
+            codigo += s.getJavaCode()
+        }
+        codigo += "}"
+        if(setenciasElse!=null)
+        {
+            codigo += "else{"
+            for(s in setenciasElse!!)
+            {
+                codigo += s.getJavaCode()
+            }
+            codigo+="}"
+        }
+        return codigo
+    }
+
 }

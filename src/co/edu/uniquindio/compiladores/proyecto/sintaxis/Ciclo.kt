@@ -13,4 +13,15 @@ class Ciclo(var expresion: Logico, var sentencias: ArrayList<Sentencia>): Senten
             s.llenarTablaSimbolos(tablaSimbolos, listaErrores, ambito)
         }
     }
+
+    override fun getJavaCode(): String {
+
+        var codigo = "while ("+expresion.getJavaCode()+ "){"
+        for(s in sentencias ){
+            codigo+= s.getJavaCode()
+        }
+        codigo += "}"
+        return codigo
+
+    }
 }

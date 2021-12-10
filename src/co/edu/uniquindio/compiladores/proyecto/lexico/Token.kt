@@ -15,6 +15,28 @@ class Token(var palabra: String, var categoria: Categoria, var fila: Int, var co
         return "Token(palabra='$palabra', categoria=$categoria, fila=$fila, columna=$columna)"
     }
 
+    fun getJavaCode(): String {
 
-}
+        if (categoria == Categoria.PALABRA_RESERVADA) {
+            if (palabra == "string") {
+                return "String"
+            }
+        }else if (categoria == Categoria.OPERADOR_LOGICO) {
+                    if (palabra == "|") {
+                        return "||"
+                    }else if (palabra == "&") {
+                        return "&&"
+                    }else if (palabra == "!!") {
+                        return "!="
+            }
+
+        } else if (categoria == Categoria.CADENA_CARACTERES) {
+            return palabra.replace("#", "\"")
+
+        }
+        return palabra
+
+
+        }
+    }
 

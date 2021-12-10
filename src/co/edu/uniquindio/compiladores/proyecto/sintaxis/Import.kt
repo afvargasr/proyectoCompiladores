@@ -28,4 +28,10 @@ class Import(var identificador: Token)
     fun analizarSemantica(tablaSimbolos: TablaSimbolos, listaErrores: ArrayList<Error>){
         analizarSemantica(tablaSimbolos, listaErrores)
     }
+
+    fun getJavaCode(): String
+    {
+        return "import "+ identificador.getJavaCode() + ";"
+
+    }
 }
