@@ -70,5 +70,28 @@ class Elemento(var listaImports: ArrayList<Import>, var listaDeclaracionVariable
     }
 
 
+    fun getJavaCode(): String
+    {
+        var codigo = ""
+        for (i in listaImports )
+        {
+            codigo += i.getJavaCode()
+        }
+        codigo+= "public class principal{"
 
+        for(v in listaDeclaracionVariable)
+        {
+            codigo += v.getJavaCode()
+        }
+        for(vI in listaDeclaracionVariableI)
+        {
+            codigo += vI.getJavaCode()
+        }
+        for(f in listaFuncion)
+        {
+            codigo += f.getJavaCode()
+        }
+        codigo+= "}"
+        return codigo
+    }
 }

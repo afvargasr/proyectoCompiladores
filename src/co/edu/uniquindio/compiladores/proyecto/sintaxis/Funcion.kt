@@ -5,7 +5,7 @@ import co.edu.uniquindio.compiladores.proyecto.lexico.Token
 import co.edu.uniquindio.compiladores.proyecto.semantica.TablaSimbolos
 import javafx.scene.control.TreeItem
 
-class Funcion(var identificador: Token, var listaParametros : ArrayList<Parametro>, var tipoRetorno: String, var listaSentencias: ArrayList<Sentencia>, var retorno: Retorno? )
+class Funcion(var identificador: Token, var listaParametros : ArrayList<Parametro>, var tipoRetorno: Token, var listaSentencias: ArrayList<Sentencia>, var retorno: Retorno? )
 {
     override fun toString(): String {
         return "Funcion(identificador='$identificador', listaParametros=$listaParametros, tipoRetorno='$tipoRetorno', listaSentencias=$listaSentencias, retorno=$retorno)"
@@ -44,7 +44,7 @@ class Funcion(var identificador: Token, var listaParametros : ArrayList<Parametr
     }
 
     fun llenarTablaSimbolos(tablaSimbolos: TablaSimbolos, listaErrores: ArrayList<Error>, ambito: String){
-        tablaSimbolos.guardarSimboloMetodo(identificador.palabra, tipoRetorno, obtenerTiposParametros(), ambito, identificador.fila, identificador.columna)
+        tablaSimbolos.guardarSimboloMetodo(identificador.palabra, tipoRetorno.palabra, obtenerTiposParametros(), ambito, identificador.fila, identificador.columna)
 
         for (p in listaParametros){
             tablaSimbolos.guardarSimboloValor(p.identificador.palabra, p.tipoDato.palabra, true, identificador.palabra, p.identificador.fila, p.identificador.columna)
@@ -68,7 +68,7 @@ class Funcion(var identificador: Token, var listaParametros : ArrayList<Parametr
         if (tipoRetorno != null){
             var retornoFinal = retorno?.obtenerTipoRetorno()
 
-            if (tipoRetorno != retornoFinal){
+            if (tipoRetorno.palabra != retornoFinal){
                 listaErrores.add(Error("El tipo de retorno $retorno no coincide con el retorno $retornoFinal", identificador.fila, identificador.columna))
             }else{
                 println("Probando")
@@ -76,4 +76,45 @@ class Funcion(var identificador: Token, var listaParametros : ArrayList<Parametr
         }
 
     }
+
+    fun getJavaCode(): String
+    {
+
+        var codigo = ""
+
+        var tipo = "void"
+        if (tipoRetorno != null) {
+            tipo = tipoRetorno.getJavaCode()
+        }
+
+        //Main de Java
+        if(identificador.getJavaCode() == "principal" || identificador.getJavaCode() == "main")
+        {
+            codigo= "public static void main(String [] args){"
+        }else
+        {
+            codigo= "static " + tipo +" "+ identificador.getJavaCode() + "("
+            if(listaParametros.isNotEmpty()) {
+                for(p in listaParametros)
+                {
+                    codigo+= p.getJavaCode()+","
+                }
+                codigo = codigo.substring(0,codigo.length-1)
+            }
+            codigo+= "){"
+        }
+        for (s in listaSentencias)
+        {
+            codigo+=s.getJavaCode()
+
+        }
+        if (retorno != null) {
+            codigo += retorno!!.getJavaCode()
+        }
+        codigo+= "}"
+
+        return codigo
+
+    }
+
 }

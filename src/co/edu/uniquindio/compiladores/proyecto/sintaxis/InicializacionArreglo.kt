@@ -13,4 +13,17 @@ class InicializacionArreglo(var tipoDato:Token, var identificador:Token, var val
         tablaSimbolos.guardarSimboloValor(identificador.palabra, tipoDato.palabra, true, ambito, identificador.fila, identificador.columna)
     }
 
+    override fun getJavaCode(): String {
+        var codigo = tipoDato.getJavaCode() + "[] " + identificador.getJavaCode() + "="
+        if (valores != null) {
+            codigo += "{"
+            for (v in valores) {
+                codigo += v + ","
+            }
+            codigo = codigo.substring(0, codigo.length-1)
+            codigo += "}"
+        }
+        codigo += ";"
+        return codigo
+    }
 }

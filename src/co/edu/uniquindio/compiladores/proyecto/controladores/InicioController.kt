@@ -5,6 +5,7 @@ import co.edu.uniquindio.compiladores.proyecto.lexico.Error
 import co.edu.uniquindio.compiladores.proyecto.lexico.Token
 import co.edu.uniquindio.compiladores.proyecto.semantica.AnalizadorSemantico
 import co.edu.uniquindio.compiladores.proyecto.sintaxis.AnalizadorSintactico
+import co.edu.uniquindio.compiladores.proyecto.sintaxis.UnidadDeCompilacion
 import javafx.collections.FXCollections
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
@@ -48,6 +49,8 @@ class InicioController: Initializable {
     @FXML
     private lateinit var arbolVisual: TreeView<String>
 
+    private var unidadCompilacion:UnidadDeCompilacion? = null
+
     @FXML
     fun analizar(actionEvent: javafx.event.ActionEvent) {
         if (txtData.text.length > 0){
@@ -56,20 +59,27 @@ class InicioController: Initializable {
             tblTokens.items = FXCollections.observableArrayList(lexico.listaTokens)
 
             val sintaxis = AnalizadorSintactico(lexico.listaTokens)
-            val uc = sintaxis.esUnidadDeCompilacion()
+            unidadCompilacion = sintaxis.esUnidadDeCompilacion()
 
-            if (uc != null) {
-                arbolVisual.root = uc.getArbolVisual()
-                val semantica = AnalizadorSemantico(uc!!)
+            if (unidadCompilacion != null) {
+                arbolVisual.root = unidadCompilacion!!.getArbolVisual()
+                val semantica = AnalizadorSemantico(unidadCompilacion!!)
                 semantica.llenarTablaSimbolos()
                 tblError.items = FXCollections.observableArrayList(semantica.listaErrores)
-                print(semantica.tablaSimbolos)
-                print(semantica.listaErrores)
+                println(semantica.tablaSimbolos)
+                println(semantica.listaErrores)
             } else {
                 var alerta = Alert(Alert.AlertType.WARNING)
                 alerta.headerText = "Mensaje de Error"
                 alerta.contentText = "Hay errores léxicos"
             }
+        }
+    }
+
+    @FXML
+    fun traducir(actionEvent: javafx.event.ActionEvent) {
+        if (unidadCompilacion != null) {
+            println(unidadCompilacion!!.getJavaCode())
         }
     }
 

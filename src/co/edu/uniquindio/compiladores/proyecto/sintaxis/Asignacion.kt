@@ -36,4 +36,7 @@ class Asignacion(var identificador: Token, var operador: Token, var valor: Token
         analizarSemantica(tablaSimbolos, listaErrores, identificador.palabra)
     }
 
+    override fun getJavaCode(): String {
+        return identificador.getJavaCode() + " " + operador.getJavaCode() + " " + valor.getJavaCode() + ";"
+    }
 }

@@ -16,4 +16,12 @@ class Argumento(var identificador: Token) {
 
         return raiz
     }
+
+
+    fun getJavaCode(): String {
+
+        return identificador.getJavaCode()
+
+    }
+
 }

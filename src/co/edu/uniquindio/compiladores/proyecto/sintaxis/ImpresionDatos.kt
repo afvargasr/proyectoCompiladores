@@ -15,4 +15,8 @@ class ImpresionDatos(var cadenaCaracteres:ExpresionCadena): Sentencia() {
 
         return raiz
     }
+
+    override fun getJavaCode(): String {
+        return "System.out.println(" + cadenaCaracteres.getJavaCode() + ")" + ";"
+    }
 }

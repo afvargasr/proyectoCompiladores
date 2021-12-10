@@ -157,7 +157,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
                             if (tokenActual.categoria == Categoria.FIN_SENTENCIA) {
                                 obtenerSiguienteToken()
                                 //la declaracion de la variable esta bien escrita
-                                return DeclaracionVariable(tipoDato.palabra, identificador, valor)
+                                return DeclaracionVariable(tipoDato, identificador, valor)
                             } else {
                                 reportarError("Falta el fin de sentencia")
                             }
@@ -229,7 +229,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
             obtenerSiguienteToken()
 
             if (tokenActual.categoria == Categoria.OPERADOR_RELACIONAL) {
-                var operador = tokenActual.palabra
+                var operador = tokenActual
                 obtenerSiguienteToken()
 
                 if (tokenActual.categoria == Categoria.IDENTIFICADOR || tokenActual.categoria == Categoria.ENTERO || tokenActual.categoria == Categoria.DECIMAL) {
@@ -257,7 +257,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
             obtenerSiguienteToken()
 
             if (tokenActual.categoria == Categoria.OPERADOR_LOGICO) {
-                var operador = tokenActual.palabra
+                var operador = tokenActual
                 obtenerSiguienteToken()
 
                 if (tokenActual.categoria == Categoria.IDENTIFICADOR || tokenActual.categoria == Categoria.ENTERO || tokenActual.categoria == Categoria.DECIMAL) {
@@ -285,7 +285,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
             obtenerSiguienteToken()
 
             if (tokenActual.categoria == Categoria.OPERADOR_ARTIMETICO) {
-                var operador = tokenActual.palabra
+                var operador = tokenActual
                 obtenerSiguienteToken()
 
                 if (tokenActual.categoria == Categoria.ENTERO || tokenActual.categoria == Categoria.DECIMAL) {
@@ -308,7 +308,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
      */
     fun esExpresionCadena(): ExpresionCadena? {
         if (tokenActual.categoria == Categoria.CADENA_CARACTERES) {
-            var cadena1 = tokenActual.palabra
+            var cadena1 = tokenActual
 
             obtenerSiguienteToken()
 
@@ -365,7 +365,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
                             if (tokenActual.categoria == Categoria.FIN_SENTENCIA) {
                                 obtenerSiguienteToken()
                                 //la declaracion de la variable esta bien escrita
-                                return DeclaracionVariableI(tipoDato.palabra, identificador, valor)
+                                return DeclaracionVariableI(tipoDato, identificador, valor)
                             } else {
                                 reportarError("Falta el fin de sentencia")
                             }
@@ -435,7 +435,7 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
                                             return Funcion(
                                                 identificador,
                                                 listaParametros,
-                                                tipoRetorno.palabra,
+                                                tipoRetorno,
                                                 listaSentencias,
                                                 retorno
                                             )
@@ -787,14 +787,14 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
     }
 
     /**
-     * <Ciclo> ::= while “(” <ExpresionLogica> “)” “{” <ListaSentencias> “}”
+     * <Ciclo> ::= while “(” <ExpresionRelacional> “)” “{” <ListaSentencias> “}”
      */
     fun esCiclo(): Ciclo? {
         if (tokenActual.categoria == Categoria.PALABRA_RESERVADA && tokenActual.palabra == "while") {
             obtenerSiguienteToken()
             if (tokenActual.categoria == Categoria.PARENTESIS_IZQUIERDO) {
                 obtenerSiguienteToken()
-                var expresion = esLogico()
+                var expresion = esRelacional()
                 if (expresion != null) {
                     if (tokenActual.categoria == Categoria.PARENTESIS_DERECHO) {
                         obtenerSiguienteToken()

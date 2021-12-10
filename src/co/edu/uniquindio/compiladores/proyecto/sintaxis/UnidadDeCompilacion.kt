@@ -31,4 +31,13 @@ class UnidadDeCompilacion(var listaElementos: ArrayList<Elemento>) {
         }
     }
 
+    fun getJavaCode(): String{
+
+        var codigo = ""
+            for (e in listaElementos) {
+                codigo += e.getJavaCode()
+            }
+
+        return codigo
+    }
 }

@@ -6,4 +6,8 @@ class LecturaDatos(var identificador: Token): Sentencia() {
     override fun toString(): String {
         return "LecturaDatos(identificador=$identificador)"
     }
+
+    override fun getJavaCode(): String {
+        return identificador.getJavaCode() + " = System.console().readLine();"
+    }
 }

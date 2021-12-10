@@ -6,4 +6,10 @@ class Incremento(var identificador:Token): Sentencia() {
     override fun toString(): String {
         return "Incremento(identificador=$identificador)"
     }
+
+    override fun  getJavaCode(): String
+    {
+        return identificador.getJavaCode()+"++" + ";"
+
+    }
 }

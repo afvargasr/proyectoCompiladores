@@ -21,4 +21,8 @@ open class Sentencia {
     fun analizarSemantica(tablaSimbolos: TablaSimbolos, listaErrores: ArrayList<Error>) {
 
     }
+
+    open fun getJavaCode(): String{
+        return ""
+    }
 }

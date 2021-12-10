@@ -29,6 +29,10 @@ class Retorno(var identificador: Token) {
     }
 
 
+    fun getJavaCode(): String {
+
+        return "return " + identificador.getJavaCode() + ";"
+    }
 
 
 }
