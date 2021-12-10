@@ -93,13 +93,13 @@ class Funcion(var identificador: Token, var listaParametros : ArrayList<Parametr
             codigo= "public static void main(String [] args){"
         }else
         {
-            codigo+= "static " + tipo +" "+ identificador.getJavaCode() + "("
+            codigo= "static " + tipo +" "+ identificador.getJavaCode() + "("
             if(listaParametros.isNotEmpty()) {
                 for(p in listaParametros)
                 {
                     codigo+= p.getJavaCode()+","
                 }
-                codigo+= codigo.substring(0,codigo.length-1)
+                codigo = codigo.substring(0,codigo.length-1)
             }
             codigo+= "){"
         }
@@ -108,8 +108,9 @@ class Funcion(var identificador: Token, var listaParametros : ArrayList<Parametr
             codigo+=s.getJavaCode()
 
         }
-
-        codigo += retorno!!.getJavaCode()
+        if (retorno != null) {
+            codigo += retorno!!.getJavaCode()
+        }
         codigo+= "}"
 
         return codigo

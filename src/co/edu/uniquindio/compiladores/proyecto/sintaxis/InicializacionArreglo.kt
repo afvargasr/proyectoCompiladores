@@ -20,7 +20,7 @@ class InicializacionArreglo(var tipoDato:Token, var identificador:Token, var val
             for (v in valores) {
                 codigo += v + ","
             }
-            codigo += codigo.substring(0, codigo.length-1)
+            codigo = codigo.substring(0, codigo.length-1)
             codigo += "}"
         }
         codigo += ";"

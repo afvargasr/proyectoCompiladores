@@ -787,14 +787,14 @@ class AnalizadorSintactico(var listaToken: ArrayList<Token>) {
     }
 
     /**
-     * <Ciclo> ::= while “(” <ExpresionLogica> “)” “{” <ListaSentencias> “}”
+     * <Ciclo> ::= while “(” <ExpresionRelacional> “)” “{” <ListaSentencias> “}”
      */
     fun esCiclo(): Ciclo? {
         if (tokenActual.categoria == Categoria.PALABRA_RESERVADA && tokenActual.palabra == "while") {
             obtenerSiguienteToken()
             if (tokenActual.categoria == Categoria.PARENTESIS_IZQUIERDO) {
                 obtenerSiguienteToken()
-                var expresion = esLogico()
+                var expresion = esRelacional()
                 if (expresion != null) {
                     if (tokenActual.categoria == Categoria.PARENTESIS_DERECHO) {
                         obtenerSiguienteToken()

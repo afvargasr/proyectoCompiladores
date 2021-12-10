@@ -9,7 +9,8 @@
 
 <AnchorPane prefHeight="592.0" prefWidth="789.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="co.edu.uniquindio.compiladores.proyecto.controladores.InicioController">
    <children>
-      <Button fx:id="btnAnalizar" layoutX="606.0" layoutY="439.0" mnemonicParsing="false" onAction="#analizar" text="Analizar" />
+      <Button fx:id="btnAnalizar" layoutX="550.0" layoutY="440.0" mnemonicParsing="false" onAction="#analizar" text="Analizar" />
+      <Button fx:id="btnTraducir" layoutX="650.0" layoutY="440.0" mnemonicParsing="false" onAction="#traducir" text="Traducir" />
       <TextArea fx:id="txtData" layoutX="21.0" layoutY="14.0" prefHeight="179.0" prefWidth="478.0" />
       <TableView fx:id="tblTokens" layoutX="21.0" layoutY="200.0" prefHeight="171.0" prefWidth="478.0">
         <columns>
